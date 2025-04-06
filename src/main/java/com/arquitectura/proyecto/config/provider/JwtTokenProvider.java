@@ -22,12 +22,14 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.stream.Collectors;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import static java.util.Arrays.stream;
 
 @Configuration
-@Log4j2
 public class JwtTokenProvider {
+
+    private static final Logger log = LogManager.getLogger(JwtTokenProvider.class);
 
     private final UserDetailsServiceImpl userDetailsService;
     private final UsuarioRepository usuarioRepository;
