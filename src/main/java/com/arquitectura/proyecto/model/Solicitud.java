@@ -20,6 +20,86 @@ public class Solicitud {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario; // reemplaza a profesor y personal
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public Asignatura getAsignatura() {
+        return asignatura;
+    }
+
+    public void setAsignatura(Asignatura asignatura) {
+        this.asignatura = asignatura;
+    }
+
+    public Laboratorio getLaboratorio() {
+        return laboratorio;
+    }
+
+    public void setLaboratorio(Laboratorio laboratorio) {
+        this.laboratorio = laboratorio;
+    }
+
+    public LocalDate getFechaSolicitud() {
+        return fechaSolicitud;
+    }
+
+    public void setFechaSolicitud(LocalDate fechaSolicitud) {
+        this.fechaSolicitud = fechaSolicitud;
+    }
+
+    public LocalDate getFechaUso() {
+        return fechaUso;
+    }
+
+    public void setFechaUso(LocalDate fechaUso) {
+        this.fechaUso = fechaUso;
+    }
+
+    public LocalTime getHorario() {
+        return horario;
+    }
+
+    public void setHorario(LocalTime horario) {
+        this.horario = horario;
+    }
+
+    public Integer getCantGrupos() {
+        return cantGrupos;
+    }
+
+    public void setCantGrupos(Integer cantGrupos) {
+        this.cantGrupos = cantGrupos;
+    }
+
+    public Boolean getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Boolean estado) {
+        this.estado = estado;
+    }
+
+    public List<SolicitudInsumo> getInsumos() {
+        return insumos;
+    }
+
+    public void setInsumos(List<SolicitudInsumo> insumos) {
+        this.insumos = insumos;
+    }
+
     @ManyToOne
     @JoinColumn(name = "id_asignatura")
     private Asignatura asignatura;
