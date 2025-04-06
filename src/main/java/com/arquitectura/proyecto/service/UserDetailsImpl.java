@@ -1,7 +1,6 @@
 package com.arquitectura.proyecto.service;
 
 
-import lombok.Data;
 import lombok.Generated;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,13 +9,78 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-@Data
+
 public class UserDetailsImpl implements UserDetails {
 
     private final Collection<GrantedAuthority> authorities;
     private final String password;
     private final String username;
     private final boolean accountNonExpired;
+
+    public Collection<GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public Collection<UserDetailsRole> getRoles() {
+        return roles;
+    }
+
+    public Collection<String> getPermissions() {
+        return permissions;
+    }
+
+    public Collection<Map<String, String>> getOptions() {
+        return options;
+    }
+
     private final boolean accountNonLocked;
     private final boolean credentialsNonExpired;
     private final boolean enabled;

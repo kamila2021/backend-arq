@@ -2,6 +2,7 @@ package com.arquitectura.proyecto.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
