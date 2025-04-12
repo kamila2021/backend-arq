@@ -4,6 +4,7 @@ import com.arquitectura.proyecto.model.Usuario;
 import com.arquitectura.proyecto.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -17,24 +18,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
+@Primary
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
-    @Autowired
+
     private final UsuarioRepository repository;
-    private PasswordEncoder encoder;
+    private final PasswordEncoder encoder;
 
+    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario;
-        try {
-            usuario = repository.findByEmail(email);
-
-        } catch(Exception e) {
-            throw new UsernameNotFoundException("Usuario no encontrado");
+        Usuario usuario = repository.findByEmail(email);
+        if (usuario == null) {
+            throw new UsernameNotFoundException("Usuario no encontrado con email: " + email);
         }
 
         Set<GrantedAuthority> authorities = usuario.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName())) // Utilizar SimpleGrantedAuthority
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toSet());
 
         return User.withUsername(usuario.getEmail())
@@ -42,10 +42,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .authorities(authorities)
                 .build();
     }
+
     public String addUser(Usuario usuario) {
         usuario.setPassword(encoder.encode(usuario.getPassword()));
         repository.save(usuario);
         return "User Added Successfully";
     }
-
 }

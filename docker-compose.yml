@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: proyecto-db
+    restart: always
+    environment:
+      POSTGRES_DB: sistemaBdd
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: kamila
+    ports:
+      - "5432:5432"
+    volumes:
+      # 1. Persistencia de datos
+      - pgdata:/var/lib/postgresql/data
+      # 2. Scripts de inicialización
+      - ./bd:/docker-entrypoint-initdb.d
+
+volumes:
+  pgdata:
