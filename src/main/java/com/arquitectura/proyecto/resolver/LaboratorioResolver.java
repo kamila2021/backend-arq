@@ -20,6 +20,14 @@ public class LaboratorioResolver {
         this.laboratorioService = laboratorioService;
     }
 
+    @MutationMapping
+    public Laboratorio crearLaboratorio(@Argument String nombre, @Argument String codigo) {
+        LaboratorioDto dto = new LaboratorioDto();
+        dto.setNombre(nombre);
+        dto.setCodigo(codigo);
+        return laboratorioService.crearLaboratorio(dto);
+    }
+
     @QueryMapping
     public List<Laboratorio> listarLaboratorios() {
         return laboratorioService.listarLaboratorios();

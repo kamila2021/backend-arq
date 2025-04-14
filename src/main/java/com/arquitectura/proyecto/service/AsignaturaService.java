@@ -18,6 +18,13 @@ public class AsignaturaService {
         this.asignaturaRepository = asignaturaRepository;
     }
 
+    public Asignatura crearAsignatura(AsignaturaDto input) {
+        Asignatura asignatura = new Asignatura();
+        asignatura.setNombre(input.getNombre());
+        asignatura.setCodigo(input.getCodigo());
+        return asignaturaRepository.save(asignatura);
+    }
+
     public List<Asignatura> listarAsignaturas() {
         return asignaturaRepository.findAll();
     }

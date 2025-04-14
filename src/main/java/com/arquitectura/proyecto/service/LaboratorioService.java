@@ -17,6 +17,13 @@ public class LaboratorioService {
         this.laboratorioRepository = laboratorioRepository;
     }
 
+    public Laboratorio crearLaboratorio(LaboratorioDto input) {
+        Laboratorio laboratorio = new Laboratorio();
+        laboratorio.setNombre(input.getNombre());
+        laboratorio.setCodigo(input.getCodigo());
+        return laboratorioRepository.save(laboratorio);
+    }
+
     public List<Laboratorio> listarLaboratorios() {
         return laboratorioRepository.findAll();
     }

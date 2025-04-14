@@ -20,6 +20,15 @@ public class AsignaturaResolver {
         this.asignaturaService = asignaturaService;
     }
 
+    @MutationMapping
+    public Asignatura crearAsignatura(@Argument String nombre, @Argument String codigo) {
+        AsignaturaDto dto = new AsignaturaDto();
+        dto.setNombre(nombre);
+        dto.setCodigo(codigo);
+        return asignaturaService.crearAsignatura(dto);
+    }
+
+
     @QueryMapping
     public List<Asignatura> listarAsignaturas() {
         return asignaturaService.listarAsignaturas();
