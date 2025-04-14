@@ -1,27 +1,25 @@
 package com.arquitectura.proyecto.service;
 
-import com.arquitectura.proyecto.dto.AsignaturaDto;
-import com.arquitectura.proyecto.model.Asignatura;
-import com.arquitectura.proyecto.repository.AsignaturaRepository;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.arquitectura.proyecto.dto.LaboratorioDto;
+import com.arquitectura.proyecto.model.Laboratorio;
+import com.arquitectura.proyecto.repository.LaboratorioRepository;
 
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class AsignaturaService {
+public class LaboratorioService {
 
-    private final AsignaturaRepository asignaturaRepository;
+    private final LaboratorioRepository laboratorioRepository;
 
-    public AsignaturaService(AsignaturaRepository asignaturaRepository) {
-        this.asignaturaRepository = asignaturaRepository;
+    public LaboratorioService(LaboratorioRepository laboratorioRepository) {
+        this.laboratorioRepository = laboratorioRepository;
     }
 
-    public List<Asignatura> listarAsignaturas() {
-        return asignaturaRepository.findAll();
+    public List<Laboratorio> listarLaboratorios() {
+        return laboratorioRepository.findAll();
     }
-
     // public InsumoService(InsumoRepository insumoRepository) {
     //     this.insumoRepository = insumoRepository;
     // }

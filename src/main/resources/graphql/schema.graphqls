@@ -2,8 +2,9 @@ type Query {
   solicitudesPorFecha: [Solicitud!]!
   solicitudesPorAsignatura: [Solicitud!]!
   stockInsumosDisponibles: [Insumo!]!
-  obtenerTodasAsignaturas: [Asignatura]!
+  listarAsignaturas: [Asignatura]!
   listarInsumos: [Insumo]
+  listarLaboratorios: [Laboratorio]
 }
 
 type Mutation {
