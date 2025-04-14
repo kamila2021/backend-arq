@@ -1,34 +1,32 @@
 package com.arquitectura.proyecto.service;
 
-import com.arquitectura.proyecto.dto.AsignaturaDto;
-import com.arquitectura.proyecto.model.Asignatura;
-import com.arquitectura.proyecto.repository.AsignaturaRepository;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.arquitectura.proyecto.dto.LaboratorioDto;
+import com.arquitectura.proyecto.model.Laboratorio;
+import com.arquitectura.proyecto.repository.LaboratorioRepository;
 
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class AsignaturaService {
+public class LaboratorioService {
 
-    private final AsignaturaRepository asignaturaRepository;
+    private final LaboratorioRepository laboratorioRepository;
 
-    public AsignaturaService(AsignaturaRepository asignaturaRepository) {
-        this.asignaturaRepository = asignaturaRepository;
+    public LaboratorioService(LaboratorioRepository laboratorioRepository) {
+        this.laboratorioRepository = laboratorioRepository;
     }
 
-    public Asignatura crearAsignatura(AsignaturaDto input) {
-        Asignatura asignatura = new Asignatura();
-        asignatura.setNombre(input.getNombre());
-        asignatura.setCodigo(input.getCodigo());
-        return asignaturaRepository.save(asignatura);
+    public Laboratorio crearLaboratorio(LaboratorioDto input) {
+        Laboratorio laboratorio = new Laboratorio();
+        laboratorio.setNombre(input.getNombre());
+        laboratorio.setCodigo(input.getCodigo());
+        return laboratorioRepository.save(laboratorio);
     }
 
-    public List<Asignatura> listarAsignaturas() {
-        return asignaturaRepository.findAll();
+    public List<Laboratorio> listarLaboratorios() {
+        return laboratorioRepository.findAll();
     }
-
     // public InsumoService(InsumoRepository insumoRepository) {
     //     this.insumoRepository = insumoRepository;
     // }

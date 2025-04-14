@@ -2,8 +2,9 @@ type Query {
   solicitudesPorFecha: [Solicitud!]!
   solicitudesPorAsignatura: [Solicitud!]!
   stockInsumosDisponibles: [Insumo!]!
-  obtenerTodasAsignaturas: [Asignatura]!
+  listarAsignaturas: [Asignatura]!
   listarInsumos: [Insumo]
+  listarLaboratorios: [Laboratorio]
 }
 
 type Mutation {
@@ -17,6 +18,8 @@ type Mutation {
   crearInsumo(input: InsumoInput!): Insumo
   modificarInsumo(id: ID!, input: InsumoInput!): Insumo
   eliminarInsumo(id: ID!): Boolean
+  crearLaboratorio(nombre: String!, codigo: String!): Laboratorio
+  crearAsignatura(nombre: String!, codigo: String!): Asignatura
 
 }
 
