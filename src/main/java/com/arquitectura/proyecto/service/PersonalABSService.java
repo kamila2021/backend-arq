@@ -9,6 +9,7 @@ import com.arquitectura.proyecto.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,12 +27,18 @@ public class PersonalABSService {
     private final InsumoRepository insumoRepository;
     private final SolicitudInsumoRepository solicitudInsumoRepository;
 
+    @PreAuthorize("isAuthenticated()")
     public List<Solicitud> listarSolicitudesDelUsuario(Long idUsuario) {
         return solicitudRepository.findByUsuarioIdOrderByFechaUsoAsc(idUsuario);
     }
 
+    @PreAuthorize("hasRole('ROLE_Admin')")
+    public List<Solicitud> listarSolicitudesPorFechaUso(){
+        return solicitudRepository.findAllByOrderByFechaUsoAsc();
+    }
 
     @Transactional
+    @PreAuthorize("hasRole('ROLE_Profesor')")
     public Solicitud crearSolicitud(CrearSolicitudInput input) {
         Solicitud solicitud = new Solicitud();
         solicitud.setUsuario(usuarioRepository.findById(input.getIdUsuario()).orElseThrow());
@@ -61,10 +68,7 @@ public class PersonalABSService {
         return saved;
     }
 
-
-
-
-
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public Solicitud modificarSolicitud(Long idSolicitud, Solicitud datosActualizados) {
         Solicitud solicitud = solicitudRepository.findById(idSolicitud)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -78,7 +82,7 @@ public class PersonalABSService {
     }
 
 
-
+    @PreAuthorize("hasRole('ROLE_Profesor') or hasRole('ROLE_Admin')")
     public void eliminarSolicitud(Long idSolicitud) {
         Solicitud solicitud = solicitudRepository.findById(idSolicitud)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -89,6 +93,8 @@ public class PersonalABSService {
         solicitudRepository.delete(solicitud);
     }
 
+    // MIRAR CON ATENCION ESTE CODIGO ⏰⏰⏰⏰⏰⏰⏰⏰⏰
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public void cancelarSolicitud(Long idSolicitud) {
         Solicitud solicitud = solicitudRepository.findById(idSolicitud)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -99,6 +105,7 @@ public class PersonalABSService {
 
 
     @Transactional
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public void confirmarYActualizarSolicitud(Long idSolicitud) {
         System.out.println("🔎 Buscando solicitud con ID: " + idSolicitud);
 

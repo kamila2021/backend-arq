@@ -4,6 +4,7 @@ import com.arquitectura.proyecto.dto.LaboratorioDto;
 import com.arquitectura.proyecto.model.Laboratorio;
 import com.arquitectura.proyecto.repository.LaboratorioRepository;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class LaboratorioService {
         this.laboratorioRepository = laboratorioRepository;
     }
 
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public Laboratorio crearLaboratorio(LaboratorioDto input) {
         Laboratorio laboratorio = new Laboratorio();
         laboratorio.setNombre(input.getNombre());
@@ -24,22 +26,10 @@ public class LaboratorioService {
         return laboratorioRepository.save(laboratorio);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public List<Laboratorio> listarLaboratorios() {
         return laboratorioRepository.findAll();
     }
-    // public InsumoService(InsumoRepository insumoRepository) {
-    //     this.insumoRepository = insumoRepository;
-    // }
-
-    // public Insumo crearInsumo(InsumoInput input) {
-    //     Insumo insumo = new Insumo();
-    //     insumo.setNombre(input.getNombre());
-    //     insumo.setTipo(input.getTipo());
-    //     insumo.setUnidadMedida(input.getUnidadMedida());
-    //     insumo.setCantidad(input.getCantidad());
-    //     insumo.setStockDisponible(input.getStockDisponible());
-    //     return insumoRepository.save(insumo);
-    // }
 
     // public Insumo modificarInsumo(Long id, InsumoInput input) {
     //     Insumo insumo = insumoRepository.findById(id)
@@ -58,7 +48,4 @@ public class LaboratorioService {
     //     insumoRepository.deleteById(id);
     // }
 
-    // public List<Insumo> listarInsumos() {
-    //     return insumoRepository.findAll();
-    // }
 }

@@ -9,6 +9,7 @@ import com.arquitectura.proyecto.repository.UsuarioRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,15 +28,23 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
 
-
+    @PreAuthorize("isAuthenticated()")
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
     }
 
+    @PreAuthorize("isAuthenticated()")
+    public Usuario obtenerUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmail(email);
+    }
+
+    @PreAuthorize("isAuthenticated()")
     public Usuario obtenerUsuario(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException(String.format("Usuario con id %s no encontrado", id)));
     }
+
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public UsuarioDto actualizarUsuario(UsuarioDto usuarioDTO) {
         try {
             System.out.println("1 Buscando usuario por ID: " + usuarioDTO.getId());
@@ -80,6 +89,7 @@ public class UsuarioService {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public ResponseEntity eliminarUsuario(Long usuarioId) {
         try {
             this.usuarioRepository.deleteById(usuarioId);
@@ -88,6 +98,8 @@ public class UsuarioService {
             return ResponseEntity.badRequest().body("Error getting Usuario: " + e.getMessage());
         }
     }
+
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public Usuario crearUsuario(UsuarioDto usuarioDto) {
         try {
             Usuario newUsuario = new Usuario();
@@ -135,6 +147,7 @@ public class UsuarioService {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public void asignarRolesAUsuario(Long usuarioId, List<Long> rolesIds) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));

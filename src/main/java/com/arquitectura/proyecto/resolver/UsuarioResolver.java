@@ -30,6 +30,11 @@ public class UsuarioResolver {
         return usuarioService.obtenerUsuario(id);
     }
 
+    @QueryMapping
+    public Usuario obtenerUsuarioPorEmail(@Argument String email) {
+        return usuarioService.obtenerUsuarioPorEmail(email);
+    }
+
     @MutationMapping
     public ResponseEntity eliminarUsuario(@Argument Long usuarioId) {
         return this.usuarioService.eliminarUsuario(usuarioId);

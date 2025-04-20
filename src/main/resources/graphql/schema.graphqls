@@ -1,4 +1,5 @@
 type Query {
+  obtenerUsuarioPorEmail(email: String!): Usuario
   solicitudesPorFecha: [Solicitud!]!
   solicitudesPorAsignatura: [Solicitud!]!
   stockInsumosDisponibles: [Insumo!]!
@@ -119,6 +120,5 @@ input InsumoInput {
   nombre: String!
   tipo: String!
   unidadMedida: String!
-  cantidad: Int!
   stockDisponible: Int!
 }

@@ -55,14 +55,19 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                 .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .withIssuer(request.getRequestURL().toString())
                 .sign(algorithm);
-
+        
+        // String username = user.getUsername();
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        String email = user.getUsername();
+        String roles = user.getAuthorities().toString();
         response.getWriter().write("""
         {
           "access_token": "%s",
-          "refresh_token": "%s"
+          "refresh_token": "%s",
+          "email": "%s",
+          "roles": "%s"
         }
-        """.formatted(accessToken, refreshToken));
+        """.formatted(accessToken, refreshToken, email, roles));
     }
 }

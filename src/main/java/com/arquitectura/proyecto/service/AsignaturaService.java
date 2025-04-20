@@ -5,6 +5,7 @@ import com.arquitectura.proyecto.model.Asignatura;
 import com.arquitectura.proyecto.repository.AsignaturaRepository;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class AsignaturaService {
         this.asignaturaRepository = asignaturaRepository;
     }
 
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public Asignatura crearAsignatura(AsignaturaDto input) {
         Asignatura asignatura = new Asignatura();
         asignatura.setNombre(input.getNombre());
@@ -25,23 +27,10 @@ public class AsignaturaService {
         return asignaturaRepository.save(asignatura);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public List<Asignatura> listarAsignaturas() {
         return asignaturaRepository.findAll();
     }
-
-    // public InsumoService(InsumoRepository insumoRepository) {
-    //     this.insumoRepository = insumoRepository;
-    // }
-
-    // public Insumo crearInsumo(InsumoInput input) {
-    //     Insumo insumo = new Insumo();
-    //     insumo.setNombre(input.getNombre());
-    //     insumo.setTipo(input.getTipo());
-    //     insumo.setUnidadMedida(input.getUnidadMedida());
-    //     insumo.setCantidad(input.getCantidad());
-    //     insumo.setStockDisponible(input.getStockDisponible());
-    //     return insumoRepository.save(insumo);
-    // }
 
     // public Insumo modificarInsumo(Long id, InsumoInput input) {
     //     Insumo insumo = insumoRepository.findById(id)
@@ -54,10 +43,6 @@ public class AsignaturaService {
     //     insumo.setStockDisponible(input.getStockDisponible());
 
     //     return insumoRepository.save(insumo);
-    // }
-
-    // public void eliminarInsumo(Long id) {
-    //     insumoRepository.deleteById(id);
     // }
 
     // public List<Insumo> listarInsumos() {

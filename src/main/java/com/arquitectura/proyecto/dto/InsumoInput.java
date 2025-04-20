@@ -7,6 +7,5 @@ public class InsumoInput {
     private String nombre;
     private String tipo;
     private String unidadMedida;
-    private Integer cantidad;
     private Integer stockDisponible;
 }

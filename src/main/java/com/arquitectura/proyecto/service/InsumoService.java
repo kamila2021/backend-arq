@@ -3,6 +3,8 @@ package com.arquitectura.proyecto.service;
 import com.arquitectura.proyecto.dto.InsumoInput;
 import com.arquitectura.proyecto.model.Insumo;
 import com.arquitectura.proyecto.repository.InsumoRepository;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,16 +18,17 @@ public class InsumoService {
         this.insumoRepository = insumoRepository;
     }
 
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public Insumo crearInsumo(InsumoInput input) {
         Insumo insumo = new Insumo();
         insumo.setNombre(input.getNombre());
         insumo.setTipo(input.getTipo());
         insumo.setUnidadMedida(input.getUnidadMedida());
-        insumo.setCantidad(input.getCantidad());
         insumo.setStockDisponible(input.getStockDisponible());
         return insumoRepository.save(insumo);
     }
 
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public Insumo modificarInsumo(Long id, InsumoInput input) {
         Insumo insumo = insumoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Insumo no encontrado"));
@@ -33,16 +36,17 @@ public class InsumoService {
         insumo.setNombre(input.getNombre());
         insumo.setTipo(input.getTipo());
         insumo.setUnidadMedida(input.getUnidadMedida());
-        insumo.setCantidad(input.getCantidad());
         insumo.setStockDisponible(input.getStockDisponible());
 
         return insumoRepository.save(insumo);
     }
 
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public void eliminarInsumo(Long id) {
         insumoRepository.deleteById(id);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public List<Insumo> listarInsumos() {
         return insumoRepository.findAll();
     }
