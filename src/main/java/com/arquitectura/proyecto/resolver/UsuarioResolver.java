@@ -26,6 +26,11 @@ public class UsuarioResolver {
     }
 
     @QueryMapping
+    public List<Usuario> listarProfesores() {
+        return usuarioService.listarProfesores();
+    }
+
+    @QueryMapping
     public Usuario obtenerUsuario(@Argument Long id) {
         return usuarioService.obtenerUsuario(id);
     }
@@ -36,9 +41,14 @@ public class UsuarioResolver {
     }
 
     @MutationMapping
-    public ResponseEntity eliminarUsuario(@Argument Long usuarioId) {
-        return this.usuarioService.eliminarUsuario(usuarioId);
+    public Boolean eliminarUsuario(@Argument Long usuarioId) {
+        try {
+            return this.usuarioService.eliminarUsuario(usuarioId).getStatusCode().is2xxSuccessful();
+        } catch (Exception e) {
+            return false; // Retorna false si hay algún error
+        }
     }
+
     @MutationMapping
     public Usuario crearUsuario(@Argument UsuarioDto usuarioDto) {
         return this.usuarioService.crearUsuario(usuarioDto);

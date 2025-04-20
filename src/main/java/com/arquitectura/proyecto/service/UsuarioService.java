@@ -28,9 +28,14 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    public List<Usuario> listarProfesores() {
+        return usuarioRepository.findAllByRoles_Id(1L);
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -93,11 +98,12 @@ public class UsuarioService {
     public ResponseEntity eliminarUsuario(Long usuarioId) {
         try {
             this.usuarioRepository.deleteById(usuarioId);
-            return ResponseEntity.ok("Usuario eliminado con exito");
+            return ResponseEntity.ok(true); // Retorna true si se elimina el usuario
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error getting Usuario: " + e.getMessage());
+            return ResponseEntity.ok(false); // Retorna false si ocurre un error
         }
     }
+
 
     @PreAuthorize("hasRole('ROLE_Admin')")
     public Usuario crearUsuario(UsuarioDto usuarioDto) {

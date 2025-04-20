@@ -16,6 +16,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario,Long> {
     @Query("SELECT u FROM Usuario u WHERE u.resetPasswordToken= ?1")
     Usuario findByResetPasswordToken(String token);
 
+    @Query("SELECT u FROM Usuario u JOIN u.roles r WHERE r.id = ?1")
+    List<Usuario> findAllByRoles_Id(Long roleId);
+
 
 
 }

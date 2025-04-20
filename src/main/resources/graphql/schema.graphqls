@@ -6,6 +6,8 @@ type Query {
   listarAsignaturas: [Asignatura]!
   listarInsumos: [Insumo]
   listarLaboratorios: [Laboratorio]
+  listarUsuarios: [Usuario]
+  listarProfesores: [Usuario]
 }
 
 type Mutation {
@@ -21,7 +23,7 @@ type Mutation {
   eliminarInsumo(id: ID!): Boolean
   crearLaboratorio(nombre: String!, codigo: String!): Laboratorio
   crearAsignatura(nombre: String!, codigo: String!): Asignatura
-
+  eliminarUsuario(usuarioId: ID!): Boolean!
 }
 
 type Solicitud {
