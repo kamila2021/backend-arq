@@ -33,7 +33,7 @@ public class UsuarioService {
         return usuarioRepository.findAll();
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public List<Usuario> listarProfesores() {
         return usuarioRepository.findAllByRoles_Id(1L);
     }
@@ -43,7 +43,7 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email);
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public Usuario obtenerUsuario(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException(String.format("Usuario con id %s no encontrado", id)));
