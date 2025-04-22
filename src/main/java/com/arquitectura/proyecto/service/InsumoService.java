@@ -18,6 +18,11 @@ public class InsumoService {
         this.insumoRepository = insumoRepository;
     }
 
+    @PreAuthorize("isAuthenticated()")
+    public List<Insumo> sotckInsumosDisponibles() {
+        return insumoRepository.findByStockDisponibleGreaterThan(0);
+    }
+
     @PreAuthorize("hasRole('ROLE_Admin')")
     public Insumo crearInsumo(InsumoInput input) {
         Insumo insumo = new Insumo();

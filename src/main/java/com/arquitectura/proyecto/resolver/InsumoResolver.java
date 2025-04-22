@@ -24,6 +24,11 @@ public class InsumoResolver {
         return insumoService.listarInsumos();
     }
 
+    @QueryMapping
+    public List<Insumo> stockInsumosDisponibles() {
+        return insumoService.sotckInsumosDisponibles();
+    }
+
     @MutationMapping
     public Insumo crearInsumo(@Argument InsumoInput input) {
         return insumoService.crearInsumo(input);

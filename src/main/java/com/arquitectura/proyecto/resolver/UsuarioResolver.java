@@ -34,7 +34,7 @@ public class UsuarioResolver {
     public Usuario obtenerUsuario(@Argument Long id) {
         return usuarioService.obtenerUsuario(id);
     }
-
+    
     @QueryMapping
     public Usuario obtenerUsuarioPorEmail(@Argument String email) {
         return usuarioService.obtenerUsuarioPorEmail(email);

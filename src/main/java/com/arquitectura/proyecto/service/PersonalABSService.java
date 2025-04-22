@@ -4,7 +4,6 @@ import com.arquitectura.proyecto.dto.CrearSolicitudInput;
 import com.arquitectura.proyecto.dto.InsumoCantidadInput;
 import com.arquitectura.proyecto.dto.SolicitudInput;
 import com.arquitectura.proyecto.model.*;
-import com.arquitectura.proyecto.model.SolicitudInsumo;
 import com.arquitectura.proyecto.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +26,25 @@ public class PersonalABSService {
     private final InsumoRepository insumoRepository;
     private final SolicitudInsumoRepository solicitudInsumoRepository;
 
+
+    @PreAuthorize("hasRole('ROLE_Admin')")
+    public List<Solicitud> listarSolicitudes() {
+        return solicitudRepository.findAll();
+    }
+
     @PreAuthorize("isAuthenticated()")
     public List<Solicitud> listarSolicitudesDelUsuario(Long idUsuario) {
         return solicitudRepository.findByUsuarioIdOrderByFechaUsoAsc(idUsuario);
+    }
+
+    @PreAuthorize("hasRole('ROLE_Admin')")
+    public List<Solicitud> listarSolicitudesRechazadas() {
+        return solicitudRepository.findByEstado(false);
+    }
+
+    @PreAuthorize("hasRole('ROLE_Admin')")
+    public List<Solicitud> listarSolicitudesAprobadas() {
+        return solicitudRepository.findByEstado(true);
     }
 
     @PreAuthorize("hasRole('ROLE_Admin')")
@@ -38,12 +53,18 @@ public class PersonalABSService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('ROLE_Profesor')")
+    @PreAuthorize("isAuthenticated()")
     public Solicitud crearSolicitud(CrearSolicitudInput input) {
         Solicitud solicitud = new Solicitud();
-        solicitud.setUsuario(usuarioRepository.findById(input.getIdUsuario()).orElseThrow());
-        solicitud.setAsignatura(asignaturaRepository.findById(input.getIdAsignatura()).orElseThrow());
-        solicitud.setLaboratorio(laboratorioRepository.findById(input.getIdLaboratorio()).orElseThrow());
+        solicitud.setUsuario(usuarioRepository.findById(input.getIdUsuario())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + input.getIdUsuario())));
+
+        solicitud.setAsignatura(asignaturaRepository.findById(input.getIdAsignatura())
+            .orElseThrow(() -> new RuntimeException("Asignatura no encontrada con ID: " + input.getIdAsignatura())));
+
+        solicitud.setLaboratorio(laboratorioRepository.findById(input.getIdLaboratorio())
+            .orElseThrow(() -> new RuntimeException("Laboratorio no encontrado con ID: " + input.getIdLaboratorio())));
+
         solicitud.setFechaSolicitud(LocalDate.now());
         solicitud.setFechaUso(LocalDate.parse(input.getFechaUso()));
         solicitud.setHorario(LocalTime.parse(input.getHorario()));
@@ -55,7 +76,9 @@ public class PersonalABSService {
 
         // Guardar cada insumo solicitado
         for (InsumoCantidadInput i : input.getInsumos()) {
-            Insumo insumo = insumoRepository.findById(i.getIdInsumo()).orElseThrow();
+            Insumo insumo = insumoRepository.findById(i.getIdInsumo())
+             .orElseThrow(() -> new RuntimeException("Insumo no encontrado con ID: " + i.getIdInsumo()));
+
 
             SolicitudInsumo si = new SolicitudInsumo();
             si.setSolicitud(saved);
@@ -82,7 +105,7 @@ public class PersonalABSService {
     }
 
 
-    @PreAuthorize("hasRole('ROLE_Profesor') or hasRole('ROLE_Admin')")
+    @PreAuthorize("hasRole('hasRole('ROLE_Admin')")
     public void eliminarSolicitud(Long idSolicitud) {
         Solicitud solicitud = solicitudRepository.findById(idSolicitud)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -106,7 +129,7 @@ public class PersonalABSService {
 
     @Transactional
     @PreAuthorize("hasRole('ROLE_Admin')")
-    public void confirmarYActualizarSolicitud(Long idSolicitud) {
+    public Solicitud confirmarYActualizarSolicitud(Long idSolicitud) {
         System.out.println("🔎 Buscando solicitud con ID: " + idSolicitud);
 
         Solicitud solicitud = solicitudRepository.findById(idSolicitud)
@@ -137,7 +160,7 @@ public class PersonalABSService {
             System.out.println("   - Cantidad solicitada: " + si.getCantidad());
 
             int stockActual = insumo.getStockDisponible();
-            int cantidadSolicitada = si.getCantidad().intValue();
+            int cantidadSolicitada = si.getCantidad().intValue() * solicitud.getCantGrupos().intValue(); // Multiplicamos por la cantidad de grupos
 
             int nuevoStock = stockActual - cantidadSolicitada;
 
@@ -153,5 +176,6 @@ public class PersonalABSService {
         }
 
         System.out.println("🎉 Confirmación y actualización de stock completada para la solicitud ID: " + idSolicitud);
+        return solicitud;
     }
 }

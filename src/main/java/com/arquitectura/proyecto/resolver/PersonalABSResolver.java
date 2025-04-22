@@ -26,11 +26,25 @@ public class PersonalABSResolver {
         return personalABSService.crearSolicitud(input);
     }
 
-   // @MutationMapping
-    //public Solicitud confirmarSolicitud(@Argument Long idSolicitud) {
-     //   return personalABSService.confirmarSolicitud(idSolicitud);
-   // }
+    @QueryMapping
+    public List<Solicitud> listarSolicitudes() {
+        return personalABSService.listarSolicitudes();
+    }
 
+    @QueryMapping
+    public List<Solicitud> listarSolicitudesRechazadas() {
+        return personalABSService.listarSolicitudesRechazadas();
+    }
+
+    @QueryMapping
+    public List<Solicitud> listarSolicitudesAprobadas() {
+        return personalABSService.listarSolicitudesAprobadas();
+    }
+
+    @QueryMapping
+    public List<Solicitud> listarSolicitudesPorFechaUso() {
+        return personalABSService.listarSolicitudesPorFechaUso();
+    }
 
     @MutationMapping
     public Solicitud modificarSolicitud(@Argument Long idSolicitud, @Argument SolicitudInput input) {
@@ -59,10 +73,10 @@ public class PersonalABSResolver {
     }
 
     @MutationMapping
-    public Boolean confirmarSolicitud(@Argument Long idSolicitud) {
-        personalABSService.confirmarYActualizarSolicitud(idSolicitud);
-        return true;
+    public Solicitud confirmarSolicitud(@Argument Long idSolicitud) {
+        return personalABSService.confirmarYActualizarSolicitud(idSolicitud);
     }
+
 
 
 
