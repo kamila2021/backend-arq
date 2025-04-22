@@ -105,7 +105,7 @@ public class PersonalABSService {
     }
 
 
-    @PreAuthorize("hasRole('hasRole('ROLE_Admin')")
+    @PreAuthorize("hasRole('ROLE_Admin')")
     public void eliminarSolicitud(Long idSolicitud) {
         Solicitud solicitud = solicitudRepository.findById(idSolicitud)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
