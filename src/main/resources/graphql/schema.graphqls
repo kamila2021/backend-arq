@@ -23,7 +23,7 @@ type Mutation {
   forgotPassword(email: String): Boolean #NO PROBADO
   updatePasswordByCode(code: String, password: String): Boolean #NO PROBADO
   crearInsumo(input: InsumoInput!): Insumo #✅
-  modificarInsumo(id: ID!, input: InsumoInput!): Insumo #NO PROBADO
+  modificarInsumo(id: ID!, input: InsumoInput!): Insumo #✅
   eliminarInsumo(id: ID!): Boolean #✅
   crearLaboratorio(nombre: String!, codigo: String!): Laboratorio #✅
   crearAsignatura(nombre: String!, codigo: String!): Asignatura #✅
