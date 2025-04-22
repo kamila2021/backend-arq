@@ -20,7 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @RequiredArgsConstructor
 @Log4j2
-// @EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final UsuarioDetailsService userDetailsService;
@@ -28,7 +28,6 @@ public class SecurityConfig {
     public static final String[] AUTH_WHITELIST = {
             "/login", "/logout",
             "/graphiql", "/graphiql/*", "/graphiql/**",
-            "/graphql", "/graphql/*", "/graphql/**",
             "/swagger-ui.html", "/swagger-ui/**",
             "/v3/api-docs", "/v3/api-docs/swagger-config"
     };
