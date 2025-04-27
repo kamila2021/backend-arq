@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  app:
+    build: .
+    container_name: proyecto-app
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sistemaBdd
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: kamila
+    ports:
+      - "8080:8080"
+    restart: always
+
   db:
     image: postgres:15-alpine
     container_name: proyecto-db
