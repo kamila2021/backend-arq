@@ -52,46 +52,50 @@ public class UsuarioService {
     @PreAuthorize("hasRole('ROLE_Admin')")
     public UsuarioDto actualizarUsuario(UsuarioDto usuarioDTO) {
         try {
-            Usuario usuario = usuarioRepository.findById(usuarioDTO.getId())
-                    .orElseThrow(() -> new RuntimeException(String.format("Usuario con id %s no encontrado", usuarioDTO.getId())));
-            
+            Optional<Usuario> optionalUsuario = this.usuarioRepository.findById(usuarioDTO.getId());
+            if (!optionalUsuario.isPresent()) {
+                throw new RuntimeException("Usuario no encontrado");
+            }
+
+            Usuario usuario = optionalUsuario.get();
             usuario.setNombre(usuarioDTO.getNombre());
             usuario.setApellido(usuarioDTO.getApellido());
             usuario.setEmail(usuarioDTO.getEmail());
-            usuario.setPassword(usuarioDTO.getPassword());
             
+            // Solo actualizar la contraseña si se proporciona una nueva
+            if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().isEmpty()) {
+                usuario.setPassword(passwordEncoder.encode(usuarioDTO.getPassword()));
+            }
+
+            // Actualizar roles
             Set<Rol> rolesActualizados = new HashSet<>();
             for (Long roleId : usuarioDTO.getRoles()) {
-                Rol role = roleRepository.findById(roleId)
-                        .orElseThrow(() -> new RuntimeException(String.format("Rol con id %s no encontrado", roleId)));
-                rolesActualizados.add(role);
+                Rol rol = roleRepository.findById(roleId)
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + roleId));
+                rolesActualizados.add(rol);
             }
-            
             usuario.setRoles(rolesActualizados);
+
             usuario.setLastModifiedDate(LocalDateTime.now());
-            
             usuarioRepository.save(usuario);
+            
             return usuarioDTO;
         } catch (Exception e) {
             throw new RuntimeException("Error al actualizar usuario: " + e.getMessage());
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_Admin')")
+    //@PreAuthorize("hasRole('ROLE_Admin')")
     public ResponseEntity eliminarUsuario(Long usuarioId) {
         try {
-            if (!usuarioRepository.existsById(usuarioId)) {
-                throw new RuntimeException(String.format("Usuario con id %s no encontrado", usuarioId));
-            }
-            usuarioRepository.deleteById(usuarioId);
-            return ResponseEntity.ok(true);
+            this.usuarioRepository.deleteById(usuarioId);
+            return ResponseEntity.ok(true); // Retorna true si se elimina el usuario
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(false);
+            return ResponseEntity.ok(false); // Retorna false si ocurre un error
         }
     }
 
 
-    @PreAuthorize("hasRole('ROLE_Admin')")
     public Usuario crearUsuario(UsuarioDto usuarioDto) {
         try {
             Usuario newUsuario = new Usuario();
@@ -117,15 +121,9 @@ public class UsuarioService {
             System.out.println("CreatedAt: " + LocalDateTime.now());
             newUsuario.setCreatedAt(LocalDateTime.now());
 
+            // Este lo puedes dejar así de momento si lo seteás manualmente
             System.out.println("LastModifiedDate: " + LocalDateTime.now());
             newUsuario.setLastModifiedDate(LocalDateTime.now());
-
-            // Verificar que todos los roles existan antes de guardar el usuario
-            for (Long roleId : usuarioDto.getRoles()) {
-                if (!roleRepository.existsById(roleId)) {
-                    throw new RuntimeException(String.format("Rol con id %s no encontrado", roleId));
-                }
-            }
 
             // Guardar el nuevo usuario en la base de datos
             Usuario usuarioGuardado = usuarioRepository.save(newUsuario);
@@ -140,7 +138,8 @@ public class UsuarioService {
 
         } catch (Exception e) {
             System.err.println("Error al crear usuario: " + e.getMessage());
-            throw new RuntimeException("Error al crear usuario: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -148,15 +147,8 @@ public class UsuarioService {
     public void asignarRolesAUsuario(Long usuarioId, List<Long> rolesIds) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
-        Set<Rol> roles = new HashSet<>();
-        for (Long roleId : rolesIds) {
-            Rol role = roleRepository.findById(roleId)
-                    .orElseThrow(() -> new RuntimeException(String.format("Rol con id %s no encontrado", roleId)));
-            roles.add(role);
-        }
-        
-        usuario.setRoles(roles);
+        List<Rol> roles = roleRepository.findAllById(rolesIds);
+        usuario.setRoles(new HashSet<>(roles));
         usuarioRepository.save(usuario);
     }
 

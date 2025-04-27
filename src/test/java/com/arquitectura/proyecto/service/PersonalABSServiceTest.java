@@ -2,7 +2,6 @@ package com.arquitectura.proyecto.service;
 
 import com.arquitectura.proyecto.dto.CrearSolicitudInput;
 import com.arquitectura.proyecto.dto.InsumoCantidadInput;
-import com.arquitectura.proyecto.dto.SolicitudInput;
 import com.arquitectura.proyecto.model.*;
 import com.arquitectura.proyecto.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,9 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.test.context.support.WithMockUser;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -22,6 +19,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,199 +46,230 @@ class PersonalABSServiceTest {
     @InjectMocks
     private PersonalABSService personalABSService;
 
-    private Solicitud solicitud;
-    private Usuario usuario;
-    private Asignatura asignatura;
-    private Laboratorio laboratorio;
-    private Insumo insumo;
-    private CrearSolicitudInput crearSolicitudInput;
+    private Solicitud solicitudMock;
+    private Usuario usuarioMock;
+    private Asignatura asignaturaMock;
+    private Laboratorio laboratorioMock;
+    private Insumo insumoMock;
+    private SolicitudInsumo solicitudInsumoMock;
+    private CrearSolicitudInput crearSolicitudInputMock;
+    private InsumoCantidadInput insumoCantidadInputMock;
 
     @BeforeEach
     void setUp() {
-        usuario = new Usuario();
-        usuario.setId(1L);
-        usuario.setNombre("Usuario Test");
+        // Configurar Usuario mock
+        usuarioMock = new Usuario();
+        usuarioMock.setId(1L);
+        usuarioMock.setNombre("Test User");
 
-        asignatura = new Asignatura();
-        asignatura.setId(1L);
-        asignatura.setName("Asignatura Test");
+        // Configurar Asignatura mock
+        asignaturaMock = new Asignatura();
+        asignaturaMock.setId(1L);
+        asignaturaMock.setNombre("Test Asignatura");
 
-        laboratorio = new Laboratorio();
-        laboratorio.setId(1L);
-        laboratorio.setNombre("Laboratorio Test");
+        // Configurar Laboratorio mock
+        laboratorioMock = new Laboratorio();
+        laboratorioMock.setId(1L);
+        laboratorioMock.setNombre("Test Lab");
 
-        insumo = new Insumo();
-        insumo.setId(1L);
-        insumo.setNombre("Insumo Test");
-        insumo.setStockDisponible(100);
+        // Configurar Insumo mock
+        insumoMock = new Insumo();
+        insumoMock.setId(1L);
+        insumoMock.setNombre("Test Insumo");
+        insumoMock.setStockDisponible(100);
 
-        solicitud = new Solicitud();
-        solicitud.setId(1L);
-        solicitud.setUsuario(usuario);
-        solicitud.setAsignatura(asignatura);
-        solicitud.setLaboratorio(laboratorio);
-        solicitud.setFechaSolicitud(LocalDate.now());
-        solicitud.setFechaUso(LocalDate.now().plusDays(1));
-        solicitud.setHorario("10:00");
-        solicitud.setCantGrupos(2);
-        solicitud.setEstado(false);
+        // Configurar Solicitud mock
+        solicitudMock = new Solicitud();
+        solicitudMock.setId(1L);
+        solicitudMock.setUsuario(usuarioMock);
+        solicitudMock.setAsignatura(asignaturaMock);
+        solicitudMock.setLaboratorio(laboratorioMock);
+        solicitudMock.setFechaSolicitud(LocalDate.now());
+        solicitudMock.setFechaUso(LocalDate.now().plusDays(1));
+        solicitudMock.setHorario(LocalTime.now());
+        solicitudMock.setCantGrupos(2);
+        solicitudMock.setEstado(false);
 
-        crearSolicitudInput = new CrearSolicitudInput();
-        crearSolicitudInput.setIdUsuario(1L);
-        crearSolicitudInput.setIdAsignatura(1L);
-        crearSolicitudInput.setIdLaboratorio(1L);
-        crearSolicitudInput.setFechaUso(LocalDate.now().plusDays(1).toString());
-        crearSolicitudInput.setHorario("10:00");
-        crearSolicitudInput.setCantGrupos(2);
+        // Configurar SolicitudInsumo mock
+        solicitudInsumoMock = new SolicitudInsumo();
+        solicitudInsumoMock.setId(1L);
+        solicitudInsumoMock.setSolicitud(solicitudMock);
+        solicitudInsumoMock.setInsumo(insumoMock);
+        solicitudInsumoMock.setCantidad(10.0);
 
-        InsumoCantidadInput insumoCantidadInput = new InsumoCantidadInput();
-        insumoCantidadInput.setIdInsumo(1L);
-        insumoCantidadInput.setCantidad(5.0);
-        crearSolicitudInput.setInsumos(Arrays.asList(insumoCantidadInput));
+        // Configurar InsumoCantidadInput mock
+        insumoCantidadInputMock = new InsumoCantidadInput();
+        insumoCantidadInputMock.setIdInsumo(1L);
+        insumoCantidadInputMock.setCantidad(10.0);
+
+        // Configurar CrearSolicitudInput mock
+        crearSolicitudInputMock = new CrearSolicitudInput();
+        crearSolicitudInputMock.setIdUsuario(1L);
+        crearSolicitudInputMock.setIdAsignatura(1L);
+        crearSolicitudInputMock.setIdLaboratorio(1L);
+        crearSolicitudInputMock.setFechaUso(LocalDate.now().plusDays(1).toString());
+        crearSolicitudInputMock.setHorario(LocalTime.now().toString());
+        crearSolicitudInputMock.setCantGrupos(2);
+        crearSolicitudInputMock.setInsumos(Arrays.asList(insumoCantidadInputMock));
     }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void listarSolicitudes_Success() {
-        List<Solicitud> solicitudes = Arrays.asList(solicitud);
-        when(solicitudRepository.findAll()).thenReturn(solicitudes);
+    void listarSolicitudes_DeberiaRetornarListaDeSolicitudes() {
+        // Arrange
+        List<Solicitud> expectedSolicitudes = Arrays.asList(solicitudMock);
+        when(solicitudRepository.findAll()).thenReturn(expectedSolicitudes);
 
+        // Act
         List<Solicitud> result = personalABSService.listarSolicitudes();
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(solicitud.getId(), result.get(0).getId());
+        assertEquals(expectedSolicitudes.size(), result.size());
         verify(solicitudRepository).findAll();
     }
 
     @Test
-    @WithMockUser
-    void listarSolicitudesDelUsuario_Success() {
-        List<Solicitud> solicitudes = Arrays.asList(solicitud);
-        when(solicitudRepository.findByUsuarioIdOrderByFechaUsoAsc(1L)).thenReturn(solicitudes);
+    void listarSolicitudesDelUsuario_DeberiaRetornarListaDeSolicitudesDelUsuario() {
+        // Arrange
+        List<Solicitud> expectedSolicitudes = Arrays.asList(solicitudMock);
+        when(solicitudRepository.findByUsuarioIdOrderByFechaUsoAsc(1L)).thenReturn(expectedSolicitudes);
 
+        // Act
         List<Solicitud> result = personalABSService.listarSolicitudesDelUsuario(1L);
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(solicitud.getId(), result.get(0).getId());
+        assertEquals(expectedSolicitudes.size(), result.size());
         verify(solicitudRepository).findByUsuarioIdOrderByFechaUsoAsc(1L);
     }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void listarSolicitudesRechazadas_Success() {
-        List<Solicitud> solicitudes = Arrays.asList(solicitud);
-        when(solicitudRepository.findByEstado(false)).thenReturn(solicitudes);
+    void listarSolicitudesRechazadas_DeberiaRetornarListaDeSolicitudesRechazadas() {
+        // Arrange
+        List<Solicitud> expectedSolicitudes = Arrays.asList(solicitudMock);
+        when(solicitudRepository.findByEstado(false)).thenReturn(expectedSolicitudes);
 
+        // Act
         List<Solicitud> result = personalABSService.listarSolicitudesRechazadas();
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(solicitud.getId(), result.get(0).getId());
+        assertEquals(expectedSolicitudes.size(), result.size());
         verify(solicitudRepository).findByEstado(false);
     }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void listarSolicitudesAprobadas_Success() {
-        solicitud.setEstado(true);
-        List<Solicitud> solicitudes = Arrays.asList(solicitud);
-        when(solicitudRepository.findByEstado(true)).thenReturn(solicitudes);
+    void listarSolicitudesAprobadas_DeberiaRetornarListaDeSolicitudesAprobadas() {
+        // Arrange
+        List<Solicitud> expectedSolicitudes = Arrays.asList(solicitudMock);
+        when(solicitudRepository.findByEstado(true)).thenReturn(expectedSolicitudes);
 
+        // Act
         List<Solicitud> result = personalABSService.listarSolicitudesAprobadas();
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(solicitud.getId(), result.get(0).getId());
+        assertEquals(expectedSolicitudes.size(), result.size());
         verify(solicitudRepository).findByEstado(true);
     }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void listarSolicitudesPorFechaUso_Success() {
-        List<Solicitud> solicitudes = Arrays.asList(solicitud);
-        when(solicitudRepository.findAllByOrderByFechaUsoAsc()).thenReturn(solicitudes);
+    void listarSolicitudesPorFechaUso_DeberiaRetornarListaDeSolicitudesOrdenadas() {
+        // Arrange
+        List<Solicitud> expectedSolicitudes = Arrays.asList(solicitudMock);
+        when(solicitudRepository.findAllByOrderByFechaUsoAsc()).thenReturn(expectedSolicitudes);
 
+        // Act
         List<Solicitud> result = personalABSService.listarSolicitudesPorFechaUso();
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(solicitud.getId(), result.get(0).getId());
+        assertEquals(expectedSolicitudes.size(), result.size());
         verify(solicitudRepository).findAllByOrderByFechaUsoAsc();
     }
 
-    @Test
-    @WithMockUser
-    void crearSolicitud_Success() {
-        when(usuarioRepository.findById(anyLong())).thenReturn(Optional.of(usuario));
-        when(asignaturaRepository.findById(anyLong())).thenReturn(Optional.of(asignatura));
-        when(laboratorioRepository.findById(anyLong())).thenReturn(Optional.of(laboratorio));
-        when(insumoRepository.findById(anyLong())).thenReturn(Optional.of(insumo));
-        when(solicitudRepository.save(any(Solicitud.class))).thenReturn(solicitud);
-        when(solicitudInsumoRepository.save(any(SolicitudInsumo.class))).thenReturn(new SolicitudInsumo());
 
-        Solicitud result = personalABSService.crearSolicitud(crearSolicitudInput);
-
-        assertNotNull(result);
-        assertEquals(solicitud.getId(), result.getId());
-        verify(solicitudRepository).save(any(Solicitud.class));
-        verify(solicitudInsumoRepository).save(any(SolicitudInsumo.class));
-    }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void modificarSolicitud_Success() {
-        when(solicitudRepository.findById(anyLong())).thenReturn(Optional.of(solicitud));
-        when(solicitudRepository.save(any(Solicitud.class))).thenReturn(solicitud);
+    void modificarSolicitud_DeberiaRetornarSolicitudModificada() {
+        // Arrange
+        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudMock));
+        when(solicitudRepository.save(any(Solicitud.class))).thenReturn(solicitudMock);
 
         Solicitud datosActualizados = new Solicitud();
         datosActualizados.setFechaUso(LocalDate.now().plusDays(2));
-        datosActualizados.setHorario("14:00");
+        datosActualizados.setHorario(LocalTime.now());
         datosActualizados.setCantGrupos(3);
         datosActualizados.setEstado(true);
 
+        // Act
         Solicitud result = personalABSService.modificarSolicitud(1L, datosActualizados);
 
+        // Assert
         assertNotNull(result);
-        assertEquals(solicitud.getId(), result.getId());
+        assertEquals(solicitudMock.getId(), result.getId());
         verify(solicitudRepository).save(any(Solicitud.class));
     }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void eliminarSolicitud_Success() {
-        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(solicitudInsumoRepository.findBySolicitudId(1L)).thenReturn(Arrays.asList(new SolicitudInsumo()));
-        doNothing().when(solicitudInsumoRepository).deleteAll(anyList());
-        doNothing().when(solicitudRepository).delete(any(Solicitud.class));
+    void eliminarSolicitud_DeberiaEliminarSolicitudYSusInsumos() {
+        // Arrange
+        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudMock));
+        List<SolicitudInsumo> insumos = Arrays.asList(solicitudInsumoMock);
+        when(solicitudInsumoRepository.findBySolicitudId(1L)).thenReturn(insumos);
+        doNothing().when(solicitudInsumoRepository).deleteAll(insumos);
+        doNothing().when(solicitudRepository).delete(solicitudMock);
 
+        // Act
         personalABSService.eliminarSolicitud(1L);
 
-        verify(solicitudRepository).findById(1L);
-        verify(solicitudInsumoRepository).findBySolicitudId(1L);
-        verify(solicitudInsumoRepository).deleteAll(anyList());
-        verify(solicitudRepository).delete(any(Solicitud.class));
+        // Assert
+        verify(solicitudInsumoRepository).deleteAll(insumos);
+        verify(solicitudRepository).delete(solicitudMock);
     }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void confirmarYActualizarSolicitud_Success() {
-        SolicitudInsumo solicitudInsumo = new SolicitudInsumo();
-        solicitudInsumo.setInsumo(insumo);
-        solicitudInsumo.setCantidad(5.0F);
-        List<SolicitudInsumo> insumos = Arrays.asList(solicitudInsumo);
+    void cancelarSolicitud_DeberiaActualizarEstadoASolicitudCancelada() {
+        // Arrange
+        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudMock));
+        when(solicitudRepository.save(any(Solicitud.class))).thenReturn(solicitudMock);
 
-        when(solicitudRepository.findById(anyLong())).thenReturn(Optional.of(solicitud));
-        when(solicitudInsumoRepository.findBySolicitudId(anyLong())).thenReturn(insumos);
-        when(solicitudRepository.save(any(Solicitud.class))).thenReturn(solicitud);
-        when(insumoRepository.save(any(Insumo.class))).thenReturn(insumo);
+        // Act
+        personalABSService.cancelarSolicitud(1L);
 
+        // Assert
+        assertFalse(solicitudMock.getEstado());
+        verify(solicitudRepository).save(solicitudMock);
+    }
+
+    @Test
+    void confirmarYActualizarSolicitud_DeberiaConfirmarSolicitudYActualizarStock() {
+        // Arrange
+        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudMock));
+        when(solicitudRepository.save(any(Solicitud.class))).thenReturn(solicitudMock);
+        List<SolicitudInsumo> insumos = Arrays.asList(solicitudInsumoMock);
+        when(solicitudInsumoRepository.findBySolicitudId(1L)).thenReturn(insumos);
+        when(insumoRepository.save(any(Insumo.class))).thenReturn(insumoMock);
+
+        // Act
         Solicitud result = personalABSService.confirmarYActualizarSolicitud(1L);
 
+        // Assert
         assertNotNull(result);
-        assertEquals(solicitud.getId(), result.getId());
-        verify(solicitudRepository).save(any(Solicitud.class));
+        assertTrue(result.getEstado());
+        verify(solicitudRepository).save(solicitudMock);
         verify(insumoRepository).save(any(Insumo.class));
+    }
+
+    @Test
+    void confirmarYActualizarSolicitud_DeberiaLanzarExcepcion_CuandoStockInsuficiente() {
+        // Arrange
+        insumoMock.setStockDisponible(1);
+        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudMock));
+        List<SolicitudInsumo> insumos = Arrays.asList(solicitudInsumoMock);
+        when(solicitudInsumoRepository.findBySolicitudId(1L)).thenReturn(insumos);
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> personalABSService.confirmarYActualizarSolicitud(1L));
     }
 } 

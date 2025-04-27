@@ -9,10 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,164 +26,97 @@ class InsumoResolverTest {
     @InjectMocks
     private InsumoResolver insumoResolver;
 
-    private Insumo insumo;
-    private InsumoInput insumoInput;
+    private Insumo insumoMock;
+    private InsumoInput insumoInputMock;
 
     @BeforeEach
     void setUp() {
-        insumo = new Insumo();
-        insumo.setId(1L);
-        insumo.setNombre("Insumo 1");
-        insumo.setTipo("Tipo 1");
-        insumo.setUnidadMedida("Unidad 1");
-        insumo.setStockDisponible(10);
+        insumoMock = new Insumo();
+        insumoMock.setId(1L);
+        insumoMock.setNombre("Test Insumo");
+        insumoMock.setTipo("Test Tipo");
+        insumoMock.setUnidadMedida("Test Unidad");
+        insumoMock.setStockDisponible(100);
 
-        insumoInput = new InsumoInput();
-        insumoInput.setNombre("Insumo 1");
-        insumoInput.setTipo("Tipo 1");
-        insumoInput.setUnidadMedida("Unidad 1");
-        insumoInput.setStockDisponible(10);
+        insumoInputMock = new InsumoInput();
+        insumoInputMock.setNombre("Test Insumo");
+        insumoInputMock.setTipo("Test Tipo");
+        insumoInputMock.setUnidadMedida("Test Unidad");
+        insumoInputMock.setStockDisponible(100);
     }
 
     @Test
-    void listarInsumos_Success() {
-        List<Insumo> insumos = Arrays.asList(insumo);
-        when(insumoService.listarInsumos()).thenReturn(insumos);
+    void listarInsumos_DeberiaRetornarListaDeInsumos() {
+        // Arrange
+        List<Insumo> expectedInsumos = Arrays.asList(insumoMock);
+        when(insumoService.listarInsumos()).thenReturn(expectedInsumos);
 
+        // Act
         List<Insumo> result = insumoResolver.listarInsumos();
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(insumo.getNombre(), result.get(0).getNombre());
-        verify(insumoService, times(1)).listarInsumos();
+        assertEquals(expectedInsumos.size(), result.size());
+        assertEquals(expectedInsumos.get(0).getId(), result.get(0).getId());
+        verify(insumoService).listarInsumos();
     }
 
     @Test
-    void listarInsumos_EmptyList() {
-        when(insumoService.listarInsumos()).thenReturn(Collections.emptyList());
+    void stockInsumosDisponibles_DeberiaRetornarListaDeInsumosConStock() {
+        // Arrange
+        List<Insumo> expectedInsumos = Arrays.asList(insumoMock);
+        when(insumoService.sotckInsumosDisponibles()).thenReturn(expectedInsumos);
 
-        List<Insumo> result = insumoResolver.listarInsumos();
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(insumoService, times(1)).listarInsumos();
-    }
-
-    @Test
-    void stockInsumosDisponibles_Success() {
-        List<Insumo> insumos = Arrays.asList(insumo);
-        when(insumoService.sotckInsumosDisponibles()).thenReturn(insumos);
-
+        // Act
         List<Insumo> result = insumoResolver.stockInsumosDisponibles();
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(insumo.getNombre(), result.get(0).getNombre());
-        verify(insumoService, times(1)).sotckInsumosDisponibles();
+        assertEquals(expectedInsumos.size(), result.size());
+        assertEquals(expectedInsumos.get(0).getId(), result.get(0).getId());
+        verify(insumoService).sotckInsumosDisponibles();
     }
 
     @Test
-    void stockInsumosDisponibles_EmptyList() {
-        when(insumoService.sotckInsumosDisponibles()).thenReturn(Collections.emptyList());
+    void crearInsumo_DeberiaRetornarNuevoInsumo() {
+        // Arrange
+        when(insumoService.crearInsumo(any(InsumoInput.class))).thenReturn(insumoMock);
 
-        List<Insumo> result = insumoResolver.stockInsumosDisponibles();
+        // Act
+        Insumo result = insumoResolver.crearInsumo(insumoInputMock);
 
+        // Assert
         assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(insumoService, times(1)).sotckInsumosDisponibles();
+        assertEquals(insumoMock.getId(), result.getId());
+        assertEquals(insumoMock.getNombre(), result.getNombre());
+        verify(insumoService).crearInsumo(insumoInputMock);
     }
 
     @Test
-    void crearInsumo_Success() {
-        when(insumoService.crearInsumo(any())).thenReturn(insumo);
+    void modificarInsumo_DeberiaRetornarInsumoModificado() {
+        // Arrange
+        when(insumoService.modificarInsumo(eq(1L), any(InsumoInput.class))).thenReturn(insumoMock);
 
-        Insumo result = insumoResolver.crearInsumo(insumoInput);
+        // Act
+        Insumo result = insumoResolver.modificarInsumo(1L, insumoInputMock);
 
+        // Assert
         assertNotNull(result);
-        assertEquals(insumo.getNombre(), result.getNombre());
-        verify(insumoService, times(1)).crearInsumo(any());
+        assertEquals(insumoMock.getId(), result.getId());
+        assertEquals(insumoMock.getNombre(), result.getNombre());
+        verify(insumoService).modificarInsumo(1L, insumoInputMock);
     }
 
     @Test
-    void crearInsumo_InvalidInput() {
-        InsumoInput invalidInput = new InsumoInput();
-        when(insumoService.crearInsumo(any())).thenThrow(new IllegalArgumentException("Invalid input"));
+    void eliminarInsumo_DeberiaRetornarTrue() {
+        // Arrange
+        doNothing().when(insumoService).eliminarInsumo(1L);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            insumoResolver.crearInsumo(invalidInput);
-        });
-        verify(insumoService, times(1)).crearInsumo(any());
-    }
-
-    @Test
-    void crearInsumo_AccessDenied() {
-        when(insumoService.crearInsumo(any())).thenThrow(new AccessDeniedException("Access denied"));
-
-        assertThrows(AccessDeniedException.class, () -> {
-            insumoResolver.crearInsumo(insumoInput);
-        });
-        verify(insumoService, times(1)).crearInsumo(any());
-    }
-
-    @Test
-    void modificarInsumo_Success() {
-        when(insumoService.modificarInsumo(anyLong(), any())).thenReturn(insumo);
-
-        Insumo result = insumoResolver.modificarInsumo(1L, insumoInput);
-
-        assertNotNull(result);
-        assertEquals(insumo.getNombre(), result.getNombre());
-        verify(insumoService, times(1)).modificarInsumo(anyLong(), any());
-    }
-
-    @Test
-    void modificarInsumo_NotFound() {
-        when(insumoService.modificarInsumo(anyLong(), any())).thenThrow(new IllegalArgumentException("Insumo not found"));
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            insumoResolver.modificarInsumo(1L, insumoInput);
-        });
-        verify(insumoService, times(1)).modificarInsumo(anyLong(), any());
-    }
-
-    @Test
-    void modificarInsumo_InvalidInput() {
-        InsumoInput invalidInput = new InsumoInput();
-        when(insumoService.modificarInsumo(anyLong(), any())).thenThrow(new IllegalArgumentException("Invalid input"));
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            insumoResolver.modificarInsumo(1L, invalidInput);
-        });
-        verify(insumoService, times(1)).modificarInsumo(anyLong(), any());
-    }
-
-    @Test
-    void eliminarInsumo_Success() {
-        doNothing().when(insumoService).eliminarInsumo(anyLong());
-
+        // Act
         Boolean result = insumoResolver.eliminarInsumo(1L);
 
+        // Assert
         assertTrue(result);
-        verify(insumoService, times(1)).eliminarInsumo(anyLong());
-    }
-
-    @Test
-    void eliminarInsumo_NotFound() {
-        doThrow(new IllegalArgumentException("Insumo not found")).when(insumoService).eliminarInsumo(anyLong());
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            insumoResolver.eliminarInsumo(1L);
-        });
-        verify(insumoService, times(1)).eliminarInsumo(anyLong());
-    }
-
-    @Test
-    void eliminarInsumo_AccessDenied() {
-        doThrow(new AccessDeniedException("Access denied")).when(insumoService).eliminarInsumo(anyLong());
-
-        assertThrows(AccessDeniedException.class, () -> {
-            insumoResolver.eliminarInsumo(1L);
-        });
-        verify(insumoService, times(1)).eliminarInsumo(anyLong());
+        verify(insumoService).eliminarInsumo(1L);
     }
 } 

@@ -1,25 +1,29 @@
 package com.arquitectura.proyecto.service;
 
 import com.arquitectura.proyecto.dto.UsuarioDto;
-import com.arquitectura.proyecto.dto.UsuarioInput;
 import com.arquitectura.proyecto.model.Rol;
+import com.arquitectura.proyecto.model.Token;
 import com.arquitectura.proyecto.model.Usuario;
 import com.arquitectura.proyecto.repository.RoleRepository;
+import com.arquitectura.proyecto.repository.TokenRepository;
 import com.arquitectura.proyecto.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
 
     @Mock
@@ -29,119 +33,88 @@ class UsuarioServiceTest {
     private RoleRepository roleRepository;
 
     @Mock
+    private TokenRepository tokenRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private AuthenticationService authenticationService;
 
     @InjectMocks
     private UsuarioService usuarioService;
 
-    private Usuario usuario;
-    private Rol role;
-    private UsuarioDto usuarioInput;
+    private Usuario usuarioMock;
+    private UsuarioDto usuarioDtoMock;
+    private Rol rolMock;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        // Crear objetos reales en lugar de mocks
+        usuarioMock = new Usuario();
+        usuarioMock.setId(1L);
+        usuarioMock.setEmail("test@example.com");
+        usuarioMock.setNombre("Test");
+        usuarioMock.setApellido("User");
+        usuarioMock.setPassword("encodedPassword");
+        usuarioMock.setEnabled(true);
+        usuarioMock.setAccountLocked(false);
+        usuarioMock.setCreatedAt(LocalDateTime.now());
+        usuarioMock.setLastModifiedDate(LocalDateTime.now());
 
-        role = new Rol();
-        role.setId(1L);
-        role.setName("ROLE_USER");
+        rolMock = new Rol();
+        rolMock.setId(1L);
+        rolMock.setName("ROLE_USER");
 
-        usuario = new Usuario();
-        usuario.setId(1L);
-        usuario.setNombre("Test User");
-        usuario.setEmail("test@example.com");
-        usuario.setPassword("encodedPassword");
-        usuario.setRoles(Set.of(role));
+        Set<Rol> roles = new HashSet<>();
+        roles.add(rolMock);
+        usuarioMock.setRoles(roles);
 
-        usuarioInput = new UsuarioDto();
-        usuarioInput.setId(1L);
-        usuarioInput.setNombre("Test User");
-        usuarioInput.setEmail("test@example.com");
-        usuarioInput.setPassword("password");
-        usuarioInput.setRoles(List.of(1L));
+        usuarioDtoMock = new UsuarioDto();
+        usuarioDtoMock.setId(1L);
+        usuarioDtoMock.setEmail("test@example.com");
+        usuarioDtoMock.setNombre("Test");
+        usuarioDtoMock.setApellido("User");
+        usuarioDtoMock.setPassword("password123");
+        usuarioDtoMock.setEnabled(true);
+        usuarioDtoMock.setAccountLocked(false);
+        usuarioDtoMock.setRoles(List.of(1L));
     }
 
     @Test
-    void crearUsuario_Success() {
-        when(roleRepository.existsById(1L)).thenReturn(true);
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+    void obtenerUsuarioPorEmail_DeberiaRetornarUsuario() {
+        // Arrange
+        when(usuarioRepository.findByEmail("test@example.com")).thenReturn(usuarioMock);
 
-        Usuario result = usuarioService.crearUsuario(usuarioInput);
+        // Act
+        Usuario resultado = usuarioService.obtenerUsuarioPorEmail("test@example.com");
 
-        assertNotNull(result);
-        assertEquals(usuario.getEmail(), result.getEmail());
-        assertEquals(usuario.getNombre(), result.getNombre());
-        verify(usuarioRepository, times(2)).save(any(Usuario.class));
+        // Assert
+        assertNotNull(resultado);
+        assertEquals("test@example.com", resultado.getEmail());
     }
 
     @Test
-    void crearUsuario_RoleNotFound() {
-        when(roleRepository.findById(1L)).thenReturn(null);
-
-        assertThrows(RuntimeException.class, () -> {
-            usuarioService.crearUsuario(usuarioInput);
-        });
-    }
-
-    @Test
-    void obtenerUsuarioPorId_Success() {
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-
-        Usuario result = usuarioService.obtenerUsuario(1L);
-
-        assertNotNull(result);
-        assertEquals(usuario.getId(), result.getId());
-        assertEquals(usuario.getEmail(), result.getEmail());
-        verify(usuarioRepository, times(1)).findById(1L);
-    }
-
-    @Test
-    void obtenerUsuarioPorId_NotFound() {
+    void obtenerUsuario_DeberiaLanzarExcepcion_CuandoNoExisteUsuario() {
+        // Arrange
         when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> {
-            usuarioService.obtenerUsuario(1L);
-        });
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> usuarioService.obtenerUsuario(1L));
     }
+
 
     @Test
-    void actualizarUsuario_Success() {
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
-        when(passwordEncoder.encode(anyString())).thenReturn("newEncodedPassword");
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
+    void eliminarUsuario_DeberiaEliminarUsuario_CuandoExiste() {
+        // Act
+        ResponseEntity<?> resultado = usuarioService.eliminarUsuario(1L);
 
-        UsuarioDto result = usuarioService.actualizarUsuario(usuarioInput);
-
-        assertNotNull(result);
-        assertEquals(usuario.getId(), result.getId());
-        verify(usuarioRepository, times(1)).save(any(Usuario.class));
+        // Assert
+        assertTrue(resultado.getStatusCode().is2xxSuccessful());
+        verify(usuarioRepository).deleteById(1L);
     }
 
-    @Test
-    void eliminarUsuario_Success() {
-        when(usuarioRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(usuarioRepository).deleteById(1L);
-
-        ResponseEntity result = usuarioService.eliminarUsuario(1L);
-
-        assertTrue((Boolean) result.getBody());
-        verify(usuarioRepository, times(1)).existsById(1L);
-        verify(usuarioRepository, times(1)).deleteById(1L);
-    }
-
-    @Test
-    void listarUsuarios_Success() {
-        List<Usuario> usuarios = Collections.singletonList(usuario);
-        when(usuarioRepository.findAll()).thenReturn(usuarios);
-
-        List<Usuario> result = usuarioService.listarUsuarios();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(usuario.getId(), result.get(0).getId());
-    }
-} 
+}

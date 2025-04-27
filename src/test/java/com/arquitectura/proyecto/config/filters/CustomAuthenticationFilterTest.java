@@ -1,6 +1,5 @@
 package com.arquitectura.proyecto.config.filters;
 
-import com.arquitectura.proyecto.service.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,14 +9,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,77 +39,143 @@ class CustomAuthenticationFilterTest {
     @Mock
     private FilterChain filterChain;
 
-    @Mock
+    private CustomAuthenticationFilter authenticationFilter;
+    private UserDetails userDetails;
     private Authentication authentication;
-
-    private CustomAuthenticationFilter filter;
-    private UserDetailsImpl userDetails;
 
     @BeforeEach
     void setUp() {
-        filter = new CustomAuthenticationFilter(authenticationManager);
-
-        // Crear autoridades
-        Collection<GrantedAuthority> authorities = Arrays.asList(
-            new SimpleGrantedAuthority("ROLE_ADMIN")
-        );
-
-        // Crear UserDetailsImpl
-        userDetails = new UserDetailsImpl(
-            1L,
-            "Test",
-            "User",
-            "test@example.com",
-            "test@example.com",
+        authenticationFilter = new CustomAuthenticationFilter(authenticationManager);
+        userDetails = new User(
+            "test@test.com",
             "password",
-            true,
-            true,
-            true,
-            true,
-            authorities,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            Collections.emptyList()
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        authentication = new UsernamePasswordAuthenticationToken(
+            userDetails,
+            null,
+            userDetails.getAuthorities()
         );
     }
 
     @Test
-    void testAttemptAuthentication() throws Exception {
-        // Configurar request
-        when(request.getParameter("username")).thenReturn("test@example.com");
+    void attemptAuthenticationWithValidCredentials() {
+        when(request.getParameter("username")).thenReturn("test@test.com");
         when(request.getParameter("password")).thenReturn("password");
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-            .thenReturn(authentication);
+        when(authenticationManager.authenticate(any())).thenReturn(authentication);
 
-        // Ejecutar el método
-        filter.attemptAuthentication(request, response);
+        Authentication result = authenticationFilter.attemptAuthentication(request, response);
 
-        // Verificar que se llamó al authenticationManager con los parámetros correctos
-        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        assertNotNull(result);
+        assertEquals("test@test.com", result.getName());
+        verify(authenticationManager).authenticate(any());
     }
 
     @Test
-    void testSuccessfulAuthentication() throws Exception {
-        // Configurar mocks
+    void successfulAuthenticationShouldGenerateTokens() throws Exception {
         StringWriter stringWriter = new StringWriter();
         PrintWriter writer = new PrintWriter(stringWriter);
+        StringBuffer requestURL = new StringBuffer("http://localhost:8080/login");
+
         when(response.getWriter()).thenReturn(writer);
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/login"));
+        when(request.getRequestURL()).thenReturn(requestURL);
 
-        // Ejecutar el método
-        filter.successfulAuthentication(request, response, filterChain, authentication);
+        authenticationFilter.successfulAuthentication(request, response, filterChain, authentication);
 
-        // Verificar que se escribió la respuesta
+        String responseBody = stringWriter.toString();
+        assertTrue(responseBody.contains("access_token"));
+        assertTrue(responseBody.contains("refresh_token"));
+        assertTrue(responseBody.contains("test@test.com"));
+        assertTrue(responseBody.contains("ROLE_USER"));
+    }
+
+    @Test
+    void attemptAuthenticationWithMissingCredentials() {
+        when(request.getParameter("username")).thenReturn(null);
+        when(request.getParameter("password")).thenReturn(null);
+
+        assertThrows(BadCredentialsException.class, () -> {
+            authenticationFilter.attemptAuthentication(request, response);
+        });
+        
+        verify(authenticationManager, never()).authenticate(any());
+    }
+
+    @Test
+    void attemptAuthenticationWithInvalidCredentials() {
+        when(request.getParameter("username")).thenReturn("test@test.com");
+        when(request.getParameter("password")).thenReturn("wrongpassword");
+        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("Invalid credentials"));
+
+        assertThrows(BadCredentialsException.class, () -> {
+            authenticationFilter.attemptAuthentication(request, response);
+        });
+    }
+
+    @Test
+    void successfulAuthenticationShouldSetResponseHeaders() throws Exception {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter writer = new PrintWriter(stringWriter);
+        StringBuffer requestURL = new StringBuffer("http://localhost:8080/login");
+
+        when(response.getWriter()).thenReturn(writer);
+        when(request.getRequestURL()).thenReturn(requestURL);
+
+        authenticationFilter.successfulAuthentication(request, response, filterChain, authentication);
+
         verify(response).setContentType("application/json");
         verify(response).setCharacterEncoding("UTF-8");
+    }
+
+    @Test
+    void attemptAuthenticationWithEmptyUsername() {
+        when(request.getParameter("username")).thenReturn("");
+        when(request.getParameter("password")).thenReturn("password");
+
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
+            authenticationFilter.attemptAuthentication(request, response);
+        });
         
-        // Verificar que la respuesta contiene los campos necesarios
-        String responseContent = stringWriter.toString();
-        assertNotNull(responseContent);
-        assertTrue(responseContent.contains("\"access_token\""));
-        assertTrue(responseContent.contains("\"refresh_token\""));
-        assertTrue(responseContent.contains("\"email\""));
-        assertTrue(responseContent.contains("\"roles\""));
+        assertEquals("Las credenciales no pueden estar vacías", exception.getMessage());
+        verify(authenticationManager, never()).authenticate(any());
+    }
+
+    @Test
+    void attemptAuthenticationWithEmptyPassword() {
+        when(request.getParameter("username")).thenReturn("test@test.com");
+        when(request.getParameter("password")).thenReturn("");
+
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
+            authenticationFilter.attemptAuthentication(request, response);
+        });
+        
+        assertEquals("Las credenciales no pueden estar vacías", exception.getMessage());
+        verify(authenticationManager, never()).authenticate(any());
+    }
+
+    @Test
+    void attemptAuthenticationWithWhitespaceUsername() {
+        when(request.getParameter("username")).thenReturn("   ");
+        when(request.getParameter("password")).thenReturn("password");
+
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
+            authenticationFilter.attemptAuthentication(request, response);
+        });
+        
+        assertEquals("Las credenciales no pueden estar vacías", exception.getMessage());
+        verify(authenticationManager, never()).authenticate(any());
+    }
+
+    @Test
+    void attemptAuthenticationWithWhitespacePassword() {
+        when(request.getParameter("username")).thenReturn("test@test.com");
+        when(request.getParameter("password")).thenReturn("   ");
+
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
+            authenticationFilter.attemptAuthentication(request, response);
+        });
+        
+        assertEquals("Las credenciales no pueden estar vacías", exception.getMessage());
+        verify(authenticationManager, never()).authenticate(any());
     }
 } 

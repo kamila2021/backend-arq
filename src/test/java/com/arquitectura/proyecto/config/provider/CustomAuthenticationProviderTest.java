@@ -1,6 +1,5 @@
 package com.arquitectura.proyecto.config.provider;
 
-import com.arquitectura.proyecto.service.UserDetailsImpl;
 import com.arquitectura.proyecto.service.UsuarioDetailsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,18 +10,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CustomAuthenticationProviderTest {
@@ -36,91 +33,57 @@ class CustomAuthenticationProviderTest {
     @InjectMocks
     private CustomAuthenticationProvider authenticationProvider;
 
-    private UserDetailsImpl userDetails;
-    private UsernamePasswordAuthenticationToken authenticationToken;
+    private UserDetails mockUserDetails;
+    private Authentication authentication;
 
     @BeforeEach
     void setUp() {
-        // Crear autoridades
-        Collection<GrantedAuthority> authorities = Arrays.asList(
-            new SimpleGrantedAuthority("ROLE_ADMIN")
-        );
-
-        // Crear UserDetailsImpl
-        userDetails = new UserDetailsImpl(
-            1L,
-            "Test",
-            "User",
-            "test@example.com",
-            "test@example.com",
+        mockUserDetails = new User(
+            "test@test.com",
             "encodedPassword",
             true,
             true,
             true,
             true,
-            authorities,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            Collections.emptyList()
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
 
-        // Crear token de autenticación
-        authenticationToken = new UsernamePasswordAuthenticationToken(
-            "test@example.com",
-            "password"
-        );
-
-        // Inicializar el provider
-        authenticationProvider = new CustomAuthenticationProvider(userDetailsService, passwordEncoder);
+        authentication = new UsernamePasswordAuthenticationToken("test@test.com", "password");
     }
 
     @Test
-    void testAuthenticateSuccess() {
-        // Configurar mocks
-        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+    void authenticateSuccessfully() {
+        when(userDetailsService.loadUserByUsername("test@test.com")).thenReturn(mockUserDetails);
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
 
-        // Ejecutar autenticación
-        Authentication result = authenticationProvider.authenticate(authenticationToken);
+        Authentication result = authenticationProvider.authenticate(authentication);
 
-        // Verificar resultado
         assertNotNull(result);
         assertTrue(result.isAuthenticated());
-        assertEquals(userDetails, result.getPrincipal());
-        verify(userDetailsService, times(1)).loadUserByUsername(anyString());
-        verify(passwordEncoder, times(1)).matches(anyString(), anyString());
+        assertEquals("test@test.com", result.getName());
     }
 
     @Test
-    void testAuthenticateFailure() {
-        // Configurar mocks
-        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+    void authenticateWithInvalidPassword() {
+        when(userDetailsService.loadUserByUsername("test@test.com")).thenReturn(mockUserDetails);
+        when(passwordEncoder.matches(any(), any())).thenReturn(false);
 
-        // Verificar que se lanza la excepción
         assertThrows(BadCredentialsException.class, () -> {
-            authenticationProvider.authenticate(authenticationToken);
+            authenticationProvider.authenticate(authentication);
         });
-        verify(userDetailsService, times(1)).loadUserByUsername(anyString());
-        verify(passwordEncoder, times(1)).matches(anyString(), anyString());
     }
 
     @Test
-    void testAuthenticateUserNotFound() {
-        // Configurar mocks
-        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(null);
+    void authenticateWithNullCredentials() {
+        Authentication authWithNullCredentials = new UsernamePasswordAuthenticationToken("test@test.com", null);
 
-        // Verificar que se lanza la excepción
         assertThrows(BadCredentialsException.class, () -> {
-            authenticationProvider.authenticate(authenticationToken);
+            authenticationProvider.authenticate(authWithNullCredentials);
         });
-        verify(userDetailsService, times(1)).loadUserByUsername(anyString());
-        verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
 
     @Test
-    void testSupports() {
+    void supportsUsernamePasswordAuthentication() {
         assertTrue(authenticationProvider.supports(UsernamePasswordAuthenticationToken.class));
-        assertFalse(authenticationProvider.supports(Authentication.class));
     }
 } 

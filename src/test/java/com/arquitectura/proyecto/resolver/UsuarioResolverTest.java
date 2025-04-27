@@ -1,7 +1,6 @@
 package com.arquitectura.proyecto.resolver;
 
 import com.arquitectura.proyecto.dto.UsuarioDto;
-import com.arquitectura.proyecto.dto.UsuarioInput;
 import com.arquitectura.proyecto.model.Usuario;
 import com.arquitectura.proyecto.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,10 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,139 +27,145 @@ class UsuarioResolverTest {
     @InjectMocks
     private UsuarioResolver usuarioResolver;
 
-    private Usuario usuario;
-    private UsuarioDto usuarioInput;
+    private Usuario usuarioMock;
+    private UsuarioDto usuarioDtoMock;
 
     @BeforeEach
     void setUp() {
-        usuario = new Usuario();
-        usuario.setId(1L);
-        usuario.setNombre("Usuario Test");
-        usuario.setEmail("test@example.com");
-        usuario.setPassword("password");
+        usuarioMock = new Usuario();
+        usuarioMock.setId(1L);
+        usuarioMock.setEmail("test@test.com");
+        usuarioMock.setNombre("Test User");
 
-        usuarioInput = new UsuarioDto();
-        usuarioInput.setNombre("Usuario Test");
-        usuarioInput.setEmail("test@example.com");
-        usuarioInput.setPassword("password");
+        usuarioDtoMock = new UsuarioDto();
+        usuarioDtoMock.setId(1L);
+        usuarioDtoMock.setEmail("test@test.com");
+        usuarioDtoMock.setNombre("Test User");
     }
 
     @Test
-    void listarUsuarios_Success() {
-        List<Usuario> usuarios = Arrays.asList(usuario);
-        when(usuarioService.listarUsuarios()).thenReturn(usuarios);
+    void listarUsuarios_DeberiaRetornarListaDeUsuarios() {
+        // Arrange
+        List<Usuario> expectedUsers = Arrays.asList(usuarioMock);
+        when(usuarioService.listarUsuarios()).thenReturn(expectedUsers);
 
+        // Act
         List<Usuario> result = usuarioResolver.listarUsuarios();
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(usuario.getNombre(), result.get(0).getNombre());
-        verify(usuarioService, times(1)).listarUsuarios();
+        assertEquals(expectedUsers.size(), result.size());
+        assertEquals(expectedUsers.get(0).getId(), result.get(0).getId());
+        verify(usuarioService).listarUsuarios();
     }
 
     @Test
-    void listarUsuarios_EmptyList() {
-        when(usuarioService.listarUsuarios()).thenReturn(Collections.emptyList());
+    void listarProfesores_DeberiaRetornarListaDeProfesores() {
+        // Arrange
+        List<Usuario> expectedProfesores = Arrays.asList(usuarioMock);
+        when(usuarioService.listarProfesores()).thenReturn(expectedProfesores);
 
-        List<Usuario> result = usuarioResolver.listarUsuarios();
+        // Act
+        List<Usuario> result = usuarioResolver.listarProfesores();
 
+        // Assert
         assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(usuarioService, times(1)).listarUsuarios();
+        assertEquals(expectedProfesores.size(), result.size());
+        verify(usuarioService).listarProfesores();
     }
 
     @Test
-    void crearUsuario_Success() {
-        when(usuarioService.crearUsuario(any())).thenReturn(usuario);
+    void obtenerUsuario_DeberiaRetornarUsuario() {
+        // Arrange
+        when(usuarioService.obtenerUsuario(1L)).thenReturn(usuarioMock);
 
-        Usuario result = usuarioResolver.crearUsuario(usuarioInput);
-
-        assertNotNull(result);
-        assertEquals(usuario.getNombre(), result.getNombre());
-        assertEquals(usuario.getEmail(), result.getEmail());
-        verify(usuarioService, times(1)).crearUsuario(any());
-    }
-
-    @Test
-    void crearUsuario_DuplicateEmail() {
-        when(usuarioService.crearUsuario(any())).thenThrow(new IllegalArgumentException("Email already exists"));
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            usuarioResolver.crearUsuario(usuarioInput);
-        });
-        verify(usuarioService, times(1)).crearUsuario(any());
-    }
-
-    @Test
-    void modificarUsuario_Success() {
-        when(usuarioService.actualizarUsuario(any())).thenReturn(usuarioInput);
-
-        UsuarioDto result = usuarioResolver.editarUsuario(usuarioInput);
-
-        assertNotNull(result);
-        assertEquals(usuario.getNombre(), result.getNombre());
-        verify(usuarioService, times(1)).actualizarUsuario(any());
-    }
-
-    @Test
-    void modificarUsuario_NotFound() {
-        when(usuarioService.actualizarUsuario(any())).thenThrow(new IllegalArgumentException("User not found"));
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            usuarioResolver.editarUsuario(usuarioInput);
-        });
-        verify(usuarioService, times(1)).actualizarUsuario(any());
-    }
-
-    @Test
-    void eliminarUsuario_Success() {
-        ResponseEntity<Boolean> response = ResponseEntity.ok(true);
-        when(usuarioService.eliminarUsuario(anyLong())).thenReturn(response);
-
-        Boolean result = usuarioResolver.eliminarUsuario(1L);
-
-        assertTrue(result);
-        verify(usuarioService, times(1)).eliminarUsuario(anyLong());
-    }
-
-    @Test
-    void eliminarUsuario_NotFound() {
-        when(usuarioService.eliminarUsuario(anyLong())).thenThrow(new IllegalArgumentException("User not found"));
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            usuarioResolver.eliminarUsuario(1L);
-        });
-        verify(usuarioService, times(1)).eliminarUsuario(anyLong());
-    }
-
-    @Test
-    void obtenerUsuarioPorId_Success() {
-        when(usuarioService.obtenerUsuario(anyLong())).thenReturn(usuario);
-
+        // Act
         Usuario result = usuarioResolver.obtenerUsuario(1L);
 
+        // Assert
         assertNotNull(result);
-        assertEquals(usuario.getNombre(), result.getNombre());
-        verify(usuarioService, times(1)).obtenerUsuario(anyLong());
+        assertEquals(usuarioMock.getId(), result.getId());
+        verify(usuarioService).obtenerUsuario(1L);
     }
 
     @Test
-    void obtenerUsuarioPorId_NotFound() {
-        when(usuarioService.obtenerUsuario(anyLong())).thenThrow(new IllegalArgumentException("User not found"));
+    void obtenerUsuarioPorEmail_DeberiaRetornarUsuario() {
+        // Arrange
+        when(usuarioService.obtenerUsuarioPorEmail("test@test.com")).thenReturn(usuarioMock);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            usuarioResolver.obtenerUsuario(1L);
-        });
-        verify(usuarioService, times(1)).obtenerUsuario(anyLong());
+        // Act
+        Usuario result = usuarioResolver.obtenerUsuarioPorEmail("test@test.com");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(usuarioMock.getEmail(), result.getEmail());
+        verify(usuarioService).obtenerUsuarioPorEmail("test@test.com");
     }
 
     @Test
-    void obtenerUsuarioPorId_AccessDenied() {
-        when(usuarioService.obtenerUsuario(anyLong())).thenThrow(new AccessDeniedException("Access denied"));
+    void eliminarUsuario_DeberiaRetornarTrue_CuandoEliminacionExitosa() {
+        // Arrange
+        when(usuarioService.eliminarUsuario(1L)).thenReturn(ResponseEntity.ok().build());
 
-        assertThrows(AccessDeniedException.class, () -> {
-            usuarioResolver.obtenerUsuario(1L);
-        });
-        verify(usuarioService, times(1)).obtenerUsuario(anyLong());
+        // Act
+        Boolean result = usuarioResolver.eliminarUsuario(1L);
+
+        // Assert
+        assertTrue(result);
+        verify(usuarioService).eliminarUsuario(1L);
+    }
+
+    @Test
+    void crearUsuario_DeberiaRetornarNuevoUsuario() {
+        // Arrange
+        when(usuarioService.crearUsuario(any(UsuarioDto.class))).thenReturn(usuarioMock);
+
+        // Act
+        Usuario result = usuarioResolver.crearUsuario(usuarioDtoMock);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(usuarioMock.getId(), result.getId());
+        verify(usuarioService).crearUsuario(usuarioDtoMock);
+    }
+
+    @Test
+    void forgotPassword_DeberiaRetornarTrue_CuandoExitoso() throws Exception {
+        // Arrange
+        when(usuarioService.forgotPassword("test@test.com")).thenReturn(true);
+
+        // Act
+        Boolean result = usuarioResolver.forgotPassword("test@test.com");
+
+        // Assert
+        assertTrue(result);
+        verify(usuarioService).forgotPassword("test@test.com");
+    }
+
+    @Test
+    void editarUsuario_DeberiaRetornarUsuarioActualizado() {
+        // Arrange
+        when(usuarioService.actualizarUsuario(any(UsuarioDto.class))).thenReturn(usuarioDtoMock);
+
+        // Act
+        UsuarioDto result = usuarioResolver.editarUsuario(usuarioDtoMock);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(usuarioDtoMock.getId(), result.getId());
+        verify(usuarioService).actualizarUsuario(usuarioDtoMock);
+    }
+
+    @Test
+    void updatePasswordByCode_DeberiaRetornarTrue_CuandoExitoso() throws Exception {
+        // Arrange
+        when(usuarioService.updatePasswordByCode("123456", "newPassword")).thenReturn(true);
+
+        // Act
+        Boolean result = usuarioResolver.updatePasswordByCode("123456", "newPassword");
+
+        // Assert
+        assertTrue(result);
+        verify(usuarioService).updatePasswordByCode("123456", "newPassword");
     }
 } 

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,87 +27,114 @@ class InsumoServiceTest {
     @InjectMocks
     private InsumoService insumoService;
 
-    private Insumo insumo;
-    private InsumoInput insumoInput;
+    private Insumo insumoMock;
+    private InsumoInput insumoInputMock;
 
     @BeforeEach
     void setUp() {
-        insumo = new Insumo();
-        insumo.setId(1L);
-        insumo.setNombre("Insumo 1");
-        insumo.setTipo("Tipo 1");
-        insumo.setUnidadMedida("Unidad 1");
-        insumo.setStockDisponible(10);
+        insumoMock = new Insumo();
+        insumoMock.setId(1L);
+        insumoMock.setNombre("Test Insumo");
+        insumoMock.setTipo("Test Tipo");
+        insumoMock.setUnidadMedida("Test Unidad");
+        insumoMock.setStockDisponible(100);
 
-        insumoInput = new InsumoInput();
-        insumoInput.setNombre("Insumo 1");
-        insumoInput.setTipo("Tipo 1");
-        insumoInput.setUnidadMedida("Unidad 1");
-        insumoInput.setStockDisponible(10);
+        insumoInputMock = new InsumoInput();
+        insumoInputMock.setNombre("Test Insumo");
+        insumoInputMock.setTipo("Test Tipo");
+        insumoInputMock.setUnidadMedida("Test Unidad");
+        insumoInputMock.setStockDisponible(100);
     }
 
     @Test
-    @WithMockUser
-    void listarInsumos_Success() {
-        List<Insumo> insumos = Arrays.asList(insumo);
-        when(insumoRepository.findAll()).thenReturn(insumos);
+    void sotckInsumosDisponibles_DeberiaRetornarListaDeInsumosConStockPositivo() {
+        // Arrange
+        List<Insumo> expectedInsumos = Arrays.asList(insumoMock);
+        when(insumoRepository.findByStockDisponibleGreaterThan(0)).thenReturn(expectedInsumos);
 
-        List<Insumo> result = insumoService.listarInsumos();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(insumo.getNombre(), result.get(0).getNombre());
-        verify(insumoRepository, times(1)).findAll();
-    }
-
-    @Test
-    @WithMockUser
-    void stockInsumosDisponibles_Success() {
-        List<Insumo> insumos = Arrays.asList(insumo);
-        when(insumoRepository.findByStockDisponibleGreaterThan(0)).thenReturn(insumos);
-
+        // Act
         List<Insumo> result = insumoService.sotckInsumosDisponibles();
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(insumo.getNombre(), result.get(0).getNombre());
-        verify(insumoRepository, times(1)).findByStockDisponibleGreaterThan(0);
+        assertEquals(expectedInsumos.size(), result.size());
+        assertEquals(expectedInsumos.get(0).getId(), result.get(0).getId());
+        verify(insumoRepository).findByStockDisponibleGreaterThan(0);
     }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void crearInsumo_Success() {
-        when(insumoRepository.save(any(Insumo.class))).thenReturn(insumo);
+    void crearInsumo_DeberiaRetornarNuevoInsumo() {
+        // Arrange
+        when(insumoRepository.save(any(Insumo.class))).thenReturn(insumoMock);
 
-        Insumo result = insumoService.crearInsumo(insumoInput);
+        // Act
+        Insumo result = insumoService.crearInsumo(insumoInputMock);
 
+        // Assert
         assertNotNull(result);
-        assertEquals(insumo.getNombre(), result.getNombre());
-        assertEquals(insumo.getTipo(), result.getTipo());
-        verify(insumoRepository, times(1)).save(any(Insumo.class));
+        assertEquals(insumoMock.getId(), result.getId());
+        assertEquals(insumoMock.getNombre(), result.getNombre());
+        assertEquals(insumoMock.getTipo(), result.getTipo());
+        assertEquals(insumoMock.getUnidadMedida(), result.getUnidadMedida());
+        assertEquals(insumoMock.getStockDisponible(), result.getStockDisponible());
+        verify(insumoRepository).save(any(Insumo.class));
     }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void modificarInsumo_Success() {
-        when(insumoRepository.findById(1L)).thenReturn(Optional.of(insumo));
-        when(insumoRepository.save(any(Insumo.class))).thenReturn(insumo);
+    void modificarInsumo_DeberiaRetornarInsumoModificado() {
+        // Arrange
+        when(insumoRepository.findById(1L)).thenReturn(Optional.of(insumoMock));
+        when(insumoRepository.save(any(Insumo.class))).thenReturn(insumoMock);
 
-        Insumo result = insumoService.modificarInsumo(1L, insumoInput);
+        // Act
+        Insumo result = insumoService.modificarInsumo(1L, insumoInputMock);
 
+        // Assert
         assertNotNull(result);
-        assertEquals(insumo.getNombre(), result.getNombre());
-        verify(insumoRepository, times(1)).findById(1L);
-        verify(insumoRepository, times(1)).save(any(Insumo.class));
+        assertEquals(insumoMock.getId(), result.getId());
+        assertEquals(insumoInputMock.getNombre(), result.getNombre());
+        assertEquals(insumoInputMock.getTipo(), result.getTipo());
+        assertEquals(insumoInputMock.getUnidadMedida(), result.getUnidadMedida());
+        assertEquals(insumoInputMock.getStockDisponible(), result.getStockDisponible());
+        verify(insumoRepository).save(any(Insumo.class));
     }
 
     @Test
-    @WithMockUser(roles = "Admin")
-    void eliminarInsumo_Success() {
+    void modificarInsumo_DeberiaLanzarExcepcion_CuandoInsumoNoExiste() {
+        // Arrange
+        when(insumoRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> insumoService.modificarInsumo(1L, insumoInputMock));
+        verify(insumoRepository).findById(1L);
+        verify(insumoRepository, never()).save(any(Insumo.class));
+    }
+
+    @Test
+    void eliminarInsumo_DeberiaEliminarInsumo() {
+        // Arrange
         doNothing().when(insumoRepository).deleteById(1L);
 
+        // Act
         insumoService.eliminarInsumo(1L);
 
-        verify(insumoRepository, times(1)).deleteById(1L);
+        // Assert
+        verify(insumoRepository).deleteById(1L);
+    }
+
+    @Test
+    void listarInsumos_DeberiaRetornarListaDeInsumos() {
+        // Arrange
+        List<Insumo> expectedInsumos = Arrays.asList(insumoMock);
+        when(insumoRepository.findAll()).thenReturn(expectedInsumos);
+
+        // Act
+        List<Insumo> result = insumoService.listarInsumos();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedInsumos.size(), result.size());
+        assertEquals(expectedInsumos.get(0).getId(), result.get(0).getId());
+        verify(insumoRepository).findAll();
     }
 } 
