@@ -20,10 +20,10 @@ public class AsignaturaService {
     }
 
     @PreAuthorize("hasRole('ROLE_Admin')")
-    public Asignatura crearAsignatura(AsignaturaDto input) {
+    public Asignatura createSubject(AsignaturaDto asignaturaDto) {
         Asignatura asignatura = new Asignatura();
-        asignatura.setNombre(input.getNombre());
-        asignatura.setCodigo(input.getCodigo());
+        asignatura.setName(asignaturaDto.getName());
+        asignatura.setCode(asignaturaDto.getCode());
         return asignaturaRepository.save(asignatura);
     }
 

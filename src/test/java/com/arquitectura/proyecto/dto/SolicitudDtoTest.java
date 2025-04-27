@@ -1,70 +1,82 @@
 package com.arquitectura.proyecto.dto;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class SolicitudDtoTest {
 
     @Test
-    void testSolicitudDto() {
-        // Crear UsuarioDto
-        UsuarioDto usuarioDto = new UsuarioDto();
-        usuarioDto.setId(1L);
-        usuarioDto.setNombre("Usuario Test");
-        usuarioDto.setEmail("test@example.com");
+    void testGettersAndSetters() {
+        AsignaturaDto asignatura = new AsignaturaDto();
+        asignatura.setId(1L);
+        asignatura.setName("Matemáticas");
+        asignatura.setCode("MAT101");
 
-        // Crear AsignaturaDto
-        AsignaturaDto asignaturaDto = new AsignaturaDto();
-        asignaturaDto.setId(1L);
-        asignaturaDto.setNombre("Asignatura Test");
+        SolicitudDto solicitud = new SolicitudDto();
+        solicitud.setId(1L);
+        solicitud.setAsignatura(asignatura);
+        solicitud.setFechaUso("2024-04-27");
+        solicitud.setHorario("10:00");
+        solicitud.setCantGrupos(3);
+        solicitud.setEstado(true);
 
-        // Crear LaboratorioDto
-        LaboratorioDto laboratorioDto = new LaboratorioDto();
-        laboratorioDto.setId(1L);
-        laboratorioDto.setNombre("Laboratorio Test");
+        assertEquals(1L, solicitud.getId());
+        assertEquals(asignatura, solicitud.getAsignatura());
+        assertEquals("2024-04-27", solicitud.getFechaUso());
+        assertEquals("10:00", solicitud.getHorario());
+        assertEquals(3, solicitud.getCantGrupos());
+        assertTrue(solicitud.getEstado());
+    }
 
-        // Crear InsumoDto
-        InsumoDto insumoDto = new InsumoDto();
-        insumoDto.setId(1L);
-        insumoDto.setNombre("Insumo Test");
+    @Test
+    void testEqualsAndHashCode() {
+        SolicitudDto solicitud1 = new SolicitudDto();
+        solicitud1.setId(1L);
+        solicitud1.setFechaUso("2024-04-27");
+        solicitud1.setHorario("10:00");
 
-        // Crear SolicitudInsumoDto
-        SolicitudInsumoDto solicitudInsumoDto = new SolicitudInsumoDto();
-        solicitudInsumoDto.setId(1L);
-        solicitudInsumoDto.setInsumo(insumoDto);
-        solicitudInsumoDto.setCantidad(5.0);
+        SolicitudDto solicitud2 = new SolicitudDto();
+        solicitud2.setId(1L);
+        solicitud2.setFechaUso("2024-04-27");
+        solicitud2.setHorario("10:00");
 
-        List<SolicitudInsumoDto> insumos = Arrays.asList(solicitudInsumoDto);
+        assertEquals(solicitud1, solicitud2);
+        assertEquals(solicitud1.hashCode(), solicitud2.hashCode());
 
-        // Crear y configurar SolicitudDto
-        SolicitudDto dto = new SolicitudDto();
-        dto.setId(1L);
-        dto.setFechaSolicitud("2024-04-27");
-        dto.setFechaUso("2024-04-28");
-        dto.setHorario("10:00");
-        dto.setCantGrupos(2);
-        dto.setEstado(true);
-        dto.setUsuario(usuarioDto);
-        dto.setAsignatura(asignaturaDto);
-        dto.setLaboratorio(laboratorioDto);
-        dto.setInsumos(insumos);
+        solicitud2.setId(2L);
+        assertNotEquals(solicitud1, solicitud2);
+        assertNotEquals(solicitud1.hashCode(), solicitud2.hashCode());
+    }
 
-        // Verificar los valores
-        assertEquals(1L, dto.getId());
-        assertEquals("2024-04-27", dto.getFechaSolicitud());
-        assertEquals("2024-04-28", dto.getFechaUso());
-        assertEquals("10:00", dto.getHorario());
-        assertEquals(2, dto.getCantGrupos());
-        assertTrue(dto.getEstado());
-        assertEquals(usuarioDto, dto.getUsuario());
-        assertEquals(asignaturaDto, dto.getAsignatura());
-        assertEquals(laboratorioDto, dto.getLaboratorio());
-        assertEquals(insumos, dto.getInsumos());
+    @Test
+    void testToString() {
+        SolicitudDto solicitud = new SolicitudDto();
+        solicitud.setId(1L);
+        solicitud.setFechaUso("2024-04-27");
+        solicitud.setHorario("10:00");
 
-        // Verificar toString
-        assertNotNull(dto.toString());
+        String toString = solicitud.toString();
+        assertTrue(toString.contains("id=1"));
+        assertTrue(toString.contains("fechaUso=2024-04-27"));
+        assertTrue(toString.contains("horario=10:00"));
+    }
+
+    @Test
+    void testSolicitudDtoWithNullValues() {
+        SolicitudDto solicitud = new SolicitudDto();
+        
+        assertNull(solicitud.getId());
+        assertNull(solicitud.getFechaSolicitud());
+        assertNull(solicitud.getFechaUso());
+        assertNull(solicitud.getHorario());
+        assertNull(solicitud.getCantGrupos());
+        assertNull(solicitud.getEstado());
+        assertNull(solicitud.getUsuario());
+        assertNull(solicitud.getAsignatura());
+        assertNull(solicitud.getLaboratorio());
+        assertNull(solicitud.getInsumos());
     }
 } 

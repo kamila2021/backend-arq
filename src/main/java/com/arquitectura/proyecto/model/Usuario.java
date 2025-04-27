@@ -41,6 +41,11 @@ public class Usuario {
     private String resetPasswordToken;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "usuario_roles",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "rol_id")
+    )
     private Set<Rol> roles = new HashSet<>();
 
     @CreatedDate

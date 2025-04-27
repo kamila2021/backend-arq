@@ -6,34 +6,71 @@ import static org.junit.jupiter.api.Assertions.*;
 class LaboratorioDtoTest {
 
     @Test
-    void testLaboratorioDto() {
-        // Crear y configurar LaboratorioDto
-        LaboratorioDto dto = new LaboratorioDto();
-        dto.setId(1L);
-        dto.setNombre("Laboratorio de Química");
-        dto.setCodigo("LAB-Q1");
+    void testLaboratorioDtoSettersAndGetters() {
+        LaboratorioDto laboratorio = new LaboratorioDto();
+        
+        laboratorio.setId(1L);
+        laboratorio.setNombre("Laboratorio de Química");
+        laboratorio.setCodigo("LAB-Q101");
 
-        // Verificar los valores
-        assertEquals(1L, dto.getId());
-        assertEquals("Laboratorio de Química", dto.getNombre());
-        assertEquals("LAB-Q1", dto.getCodigo());
+        assertEquals(1L, laboratorio.getId());
+        assertEquals("Laboratorio de Química", laboratorio.getNombre());
+        assertEquals("LAB-Q101", laboratorio.getCodigo());
+    }
 
-        // Verificar toString
-        assertNotNull(dto.toString());
+    @Test
+    void testLaboratorioDtoEqualsAndHashCode() {
+        LaboratorioDto laboratorio1 = new LaboratorioDto();
+        laboratorio1.setId(1L);
+        laboratorio1.setNombre("Laboratorio de Química");
+        laboratorio1.setCodigo("LAB-Q101");
 
-        // Probar constructor con todos los campos
-        LaboratorioDto dto2 = new LaboratorioDto();
-        dto2.setId(2L);
-        dto2.setNombre("Laboratorio de Física");
-        dto2.setCodigo("LAB-F1");
+        LaboratorioDto laboratorio2 = new LaboratorioDto();
+        laboratorio2.setId(1L);
+        laboratorio2.setNombre("Laboratorio de Química");
+        laboratorio2.setCodigo("LAB-Q101");
 
-        // Verificar equals y hashCode
-        assertNotEquals(dto, dto2);
-        LaboratorioDto dto3 = new LaboratorioDto();
-        dto3.setId(1L);
-        dto3.setNombre("Laboratorio de Química");
-        dto3.setCodigo("LAB-Q1");
-        assertEquals(dto, dto3);
-        assertEquals(dto.hashCode(), dto3.hashCode());
+        LaboratorioDto laboratorio3 = new LaboratorioDto();
+        laboratorio3.setId(2L);
+        laboratorio3.setNombre("Laboratorio de Física");
+        laboratorio3.setCodigo("LAB-F101");
+
+        assertEquals(laboratorio1, laboratorio2);
+        assertEquals(laboratorio1.hashCode(), laboratorio2.hashCode());
+        assertNotEquals(laboratorio1, laboratorio3);
+        assertNotEquals(laboratorio1.hashCode(), laboratorio3.hashCode());
+    }
+
+    @Test
+    void testLaboratorioDtoToString() {
+        LaboratorioDto laboratorio = new LaboratorioDto();
+        laboratorio.setId(1L);
+        laboratorio.setNombre("Laboratorio de Química");
+        laboratorio.setCodigo("LAB-Q101");
+
+        String toString = laboratorio.toString();
+        
+        assertTrue(toString.contains("id=1"));
+        assertTrue(toString.contains("nombre=Laboratorio de Química"));
+        assertTrue(toString.contains("codigo=LAB-Q101"));
+    }
+
+    @Test
+    void testLaboratorioDtoWithNullValues() {
+        LaboratorioDto laboratorio = new LaboratorioDto();
+        
+        assertNull(laboratorio.getId());
+        assertNull(laboratorio.getNombre());
+        assertNull(laboratorio.getCodigo());
+    }
+
+    @Test
+    void testLaboratorioDtoWithEmptyStrings() {
+        LaboratorioDto laboratorio = new LaboratorioDto();
+        laboratorio.setNombre("");
+        laboratorio.setCodigo("");
+        
+        assertEquals("", laboratorio.getNombre());
+        assertEquals("", laboratorio.getCodigo());
     }
 } 

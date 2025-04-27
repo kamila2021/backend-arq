@@ -67,23 +67,20 @@ public class PersonalABSService {
 
         solicitud.setFechaSolicitud(LocalDate.now());
         solicitud.setFechaUso(LocalDate.parse(input.getFechaUso()));
-        solicitud.setHorario(LocalTime.parse(input.getHorario()));
+        solicitud.setHorario(input.getHorario());
         solicitud.setCantGrupos(input.getCantGrupos());
-        solicitud.setEstado(false); // aún no confirmada
+        solicitud.setEstado(false);
 
-        // Guardar primero la solicitud
         Solicitud saved = solicitudRepository.save(solicitud);
 
-        // Guardar cada insumo solicitado
         for (InsumoCantidadInput i : input.getInsumos()) {
             Insumo insumo = insumoRepository.findById(i.getIdInsumo())
              .orElseThrow(() -> new RuntimeException("Insumo no encontrado con ID: " + i.getIdInsumo()));
 
-
             SolicitudInsumo si = new SolicitudInsumo();
             si.setSolicitud(saved);
             si.setInsumo(insumo);
-            si.setCantidad(i.getCantidad());
+            si.setCantidad(i.getCantidad().floatValue());
 
             solicitudInsumoRepository.save(si);
         }
@@ -101,7 +98,7 @@ public class PersonalABSService {
         solicitud.setCantGrupos(datosActualizados.getCantGrupos());
         solicitud.setEstado(datosActualizados.getEstado());
 
-        return solicitudRepository.save(solicitud); // 👈 este objeto ya tiene un ID
+        return solicitudRepository.save(solicitud);
     }
 
 
@@ -122,7 +119,7 @@ public class PersonalABSService {
         Solicitud solicitud = solicitudRepository.findById(idSolicitud)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
-        solicitud.setEstado(false); // o un campo como `cancelada = true`
+        solicitud.setEstado(false);
         solicitudRepository.save(solicitud);
     }
 
@@ -142,7 +139,6 @@ public class PersonalABSService {
 
         System.out.println("📌 Estado de la solicitud actualizado a: true");
 
-        // Buscar insumos asociados a la solicitud
         List<SolicitudInsumo> solicitudInsumos = solicitudInsumoRepository.findBySolicitudId(idSolicitud);
 
         System.out.println("📦 Cantidad de insumos asociados: " + solicitudInsumos.size());
@@ -160,7 +156,7 @@ public class PersonalABSService {
             System.out.println("   - Cantidad solicitada: " + si.getCantidad());
 
             int stockActual = insumo.getStockDisponible();
-            int cantidadSolicitada = si.getCantidad().intValue() * solicitud.getCantGrupos().intValue(); // Multiplicamos por la cantidad de grupos
+            int cantidadSolicitada = Math.round(si.getCantidad() * solicitud.getCantGrupos());
 
             int nuevoStock = stockActual - cantidadSolicitada;
 

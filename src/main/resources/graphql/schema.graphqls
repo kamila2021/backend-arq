@@ -26,7 +26,7 @@ type Mutation {
   modificarInsumo(id: ID!, input: InsumoInput!): Insumo #✅
   eliminarInsumo(id: ID!): Boolean #✅
   crearLaboratorio(nombre: String!, codigo: String!): Laboratorio #✅
-  crearAsignatura(nombre: String!, codigo: String!): Asignatura #✅
+  createSubject(nombre: String!, codigo: String!): Asignatura!
   eliminarUsuario(usuarioId: ID!): Boolean! #✅
 }
 

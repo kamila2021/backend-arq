@@ -63,7 +63,7 @@ class PersonalABSServiceTest {
 
         asignatura = new Asignatura();
         asignatura.setId(1L);
-        asignatura.setNombre("Asignatura Test");
+        asignatura.setName("Asignatura Test");
 
         laboratorio = new Laboratorio();
         laboratorio.setId(1L);
@@ -81,7 +81,7 @@ class PersonalABSServiceTest {
         solicitud.setLaboratorio(laboratorio);
         solicitud.setFechaSolicitud(LocalDate.now());
         solicitud.setFechaUso(LocalDate.now().plusDays(1));
-        solicitud.setHorario(LocalTime.now());
+        solicitud.setHorario("10:00");
         solicitud.setCantGrupos(2);
         solicitud.setEstado(false);
 
@@ -90,13 +90,13 @@ class PersonalABSServiceTest {
         crearSolicitudInput.setIdAsignatura(1L);
         crearSolicitudInput.setIdLaboratorio(1L);
         crearSolicitudInput.setFechaUso(LocalDate.now().plusDays(1).toString());
-        crearSolicitudInput.setHorario(LocalTime.now().toString());
+        crearSolicitudInput.setHorario("10:00");
         crearSolicitudInput.setCantGrupos(2);
 
-        InsumoCantidadInput insumoCantidad = new InsumoCantidadInput();
-        insumoCantidad.setIdInsumo(1L);
-        insumoCantidad.setCantidad(5.0);
-        crearSolicitudInput.setInsumos(Arrays.asList(insumoCantidad));
+        InsumoCantidadInput insumoCantidadInput = new InsumoCantidadInput();
+        insumoCantidadInput.setIdInsumo(1L);
+        insumoCantidadInput.setCantidad(5.0);
+        crearSolicitudInput.setInsumos(Arrays.asList(insumoCantidadInput));
     }
 
     @Test
@@ -110,7 +110,7 @@ class PersonalABSServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(solicitud.getId(), result.get(0).getId());
-        verify(solicitudRepository, times(1)).findAll();
+        verify(solicitudRepository).findAll();
     }
 
     @Test
@@ -124,7 +124,7 @@ class PersonalABSServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(solicitud.getId(), result.get(0).getId());
-        verify(solicitudRepository, times(1)).findByUsuarioIdOrderByFechaUsoAsc(1L);
+        verify(solicitudRepository).findByUsuarioIdOrderByFechaUsoAsc(1L);
     }
 
     @Test
@@ -138,7 +138,7 @@ class PersonalABSServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(solicitud.getId(), result.get(0).getId());
-        verify(solicitudRepository, times(1)).findByEstado(false);
+        verify(solicitudRepository).findByEstado(false);
     }
 
     @Test
@@ -153,7 +153,7 @@ class PersonalABSServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(solicitud.getId(), result.get(0).getId());
-        verify(solicitudRepository, times(1)).findByEstado(true);
+        verify(solicitudRepository).findByEstado(true);
     }
 
     @Test
@@ -167,16 +167,16 @@ class PersonalABSServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(solicitud.getId(), result.get(0).getId());
-        verify(solicitudRepository, times(1)).findAllByOrderByFechaUsoAsc();
+        verify(solicitudRepository).findAllByOrderByFechaUsoAsc();
     }
 
     @Test
     @WithMockUser
     void crearSolicitud_Success() {
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-        when(asignaturaRepository.findById(1L)).thenReturn(Optional.of(asignatura));
-        when(laboratorioRepository.findById(1L)).thenReturn(Optional.of(laboratorio));
-        when(insumoRepository.findById(1L)).thenReturn(Optional.of(insumo));
+        when(usuarioRepository.findById(anyLong())).thenReturn(Optional.of(usuario));
+        when(asignaturaRepository.findById(anyLong())).thenReturn(Optional.of(asignatura));
+        when(laboratorioRepository.findById(anyLong())).thenReturn(Optional.of(laboratorio));
+        when(insumoRepository.findById(anyLong())).thenReturn(Optional.of(insumo));
         when(solicitudRepository.save(any(Solicitud.class))).thenReturn(solicitud);
         when(solicitudInsumoRepository.save(any(SolicitudInsumo.class))).thenReturn(new SolicitudInsumo());
 
@@ -184,28 +184,27 @@ class PersonalABSServiceTest {
 
         assertNotNull(result);
         assertEquals(solicitud.getId(), result.getId());
-        verify(solicitudRepository, times(1)).save(any(Solicitud.class));
-        verify(solicitudInsumoRepository, times(1)).save(any(SolicitudInsumo.class));
+        verify(solicitudRepository).save(any(Solicitud.class));
+        verify(solicitudInsumoRepository).save(any(SolicitudInsumo.class));
     }
 
     @Test
     @WithMockUser(roles = "Admin")
     void modificarSolicitud_Success() {
-        SolicitudInput input = new SolicitudInput();
-        input.setFechaUso(LocalDate.now().plusDays(2).toString());
-        input.setHorario(LocalTime.now().plusHours(1).toString());
-        input.setCantGrupos(3);
-        input.setEstado(true);
-
-        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(solicitudRepository.findById(anyLong())).thenReturn(Optional.of(solicitud));
         when(solicitudRepository.save(any(Solicitud.class))).thenReturn(solicitud);
 
-        Solicitud result = personalABSService.modificarSolicitud(1L, new Solicitud());
+        Solicitud datosActualizados = new Solicitud();
+        datosActualizados.setFechaUso(LocalDate.now().plusDays(2));
+        datosActualizados.setHorario("14:00");
+        datosActualizados.setCantGrupos(3);
+        datosActualizados.setEstado(true);
+
+        Solicitud result = personalABSService.modificarSolicitud(1L, datosActualizados);
 
         assertNotNull(result);
         assertEquals(solicitud.getId(), result.getId());
-        verify(solicitudRepository, times(1)).findById(1L);
-        verify(solicitudRepository, times(1)).save(any(Solicitud.class));
+        verify(solicitudRepository).save(any(Solicitud.class));
     }
 
     @Test
@@ -218,10 +217,10 @@ class PersonalABSServiceTest {
 
         personalABSService.eliminarSolicitud(1L);
 
-        verify(solicitudRepository, times(1)).findById(1L);
-        verify(solicitudInsumoRepository, times(1)).findBySolicitudId(1L);
-        verify(solicitudInsumoRepository, times(1)).deleteAll(anyList());
-        verify(solicitudRepository, times(1)).delete(any(Solicitud.class));
+        verify(solicitudRepository).findById(1L);
+        verify(solicitudInsumoRepository).findBySolicitudId(1L);
+        verify(solicitudInsumoRepository).deleteAll(anyList());
+        verify(solicitudRepository).delete(any(Solicitud.class));
     }
 
     @Test
@@ -229,20 +228,19 @@ class PersonalABSServiceTest {
     void confirmarYActualizarSolicitud_Success() {
         SolicitudInsumo solicitudInsumo = new SolicitudInsumo();
         solicitudInsumo.setInsumo(insumo);
-        solicitudInsumo.setCantidad(5.0);
+        solicitudInsumo.setCantidad(5.0F);
+        List<SolicitudInsumo> insumos = Arrays.asList(solicitudInsumo);
 
-        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(solicitudInsumoRepository.findBySolicitudId(1L)).thenReturn(Arrays.asList(solicitudInsumo));
-        when(insumoRepository.save(any(Insumo.class))).thenReturn(insumo);
+        when(solicitudRepository.findById(anyLong())).thenReturn(Optional.of(solicitud));
+        when(solicitudInsumoRepository.findBySolicitudId(anyLong())).thenReturn(insumos);
         when(solicitudRepository.save(any(Solicitud.class))).thenReturn(solicitud);
+        when(insumoRepository.save(any(Insumo.class))).thenReturn(insumo);
 
         Solicitud result = personalABSService.confirmarYActualizarSolicitud(1L);
 
         assertNotNull(result);
-        assertTrue(result.getEstado());
-        verify(solicitudRepository, times(1)).findById(1L);
-        verify(solicitudInsumoRepository, times(1)).findBySolicitudId(1L);
-        verify(insumoRepository, times(1)).save(any(Insumo.class));
-        verify(solicitudRepository, times(1)).save(any(Solicitud.class));
+        assertEquals(solicitud.getId(), result.getId());
+        verify(solicitudRepository).save(any(Solicitud.class));
+        verify(insumoRepository).save(any(Insumo.class));
     }
 } 

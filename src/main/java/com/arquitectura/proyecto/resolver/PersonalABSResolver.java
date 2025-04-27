@@ -50,14 +50,12 @@ public class PersonalABSResolver {
     public Solicitud modificarSolicitud(@Argument Long idSolicitud, @Argument SolicitudInput input) {
         Solicitud datosActualizados = new Solicitud();
         datosActualizados.setFechaUso(LocalDate.parse(input.getFechaUso()));
-        datosActualizados.setHorario(LocalTime.parse(input.getHorario()));
+        datosActualizados.setHorario(input.getHorario());
         datosActualizados.setCantGrupos(input.getCantGrupos());
         datosActualizados.setEstado(input.getEstado());
 
-        return personalABSService.modificarSolicitud(idSolicitud, datosActualizados); // ✅ este sí tiene id
+        return personalABSService.modificarSolicitud(idSolicitud, datosActualizados);
     }
-
-
 
     @MutationMapping
     public Boolean eliminarSolicitud(@Argument Long idSolicitud) {
@@ -65,8 +63,6 @@ public class PersonalABSResolver {
         return true;
     }
 
-
-    // ✅ NUEVO: Obtener las solicitudes del profesor (por su ID)
     @QueryMapping
     public List<Solicitud> solicitudesDelProfesor(@Argument Long idUsuario) {
         return personalABSService.listarSolicitudesDelUsuario(idUsuario);
@@ -76,8 +72,4 @@ public class PersonalABSResolver {
     public Solicitud confirmarSolicitud(@Argument Long idSolicitud) {
         return personalABSService.confirmarYActualizarSolicitud(idSolicitud);
     }
-
-
-
-
 }

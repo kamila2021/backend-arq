@@ -34,25 +34,25 @@ class AsignaturaServiceTest {
     void setUp() {
         asignatura = new Asignatura();
         asignatura.setId(1L);
-        asignatura.setNombre("Asignatura 1");
-        asignatura.setCodigo("ASG001");
+        asignatura.setName("Matemáticas");
+        asignatura.setCode("MAT101");
 
         asignaturaDto = new AsignaturaDto();
-        asignaturaDto.setNombre("Asignatura 1");
-        asignaturaDto.setCodigo("ASG001");
+        asignaturaDto.setName("Matemáticas");
+        asignaturaDto.setCode("MAT101");
     }
 
     @Test
     @WithMockUser(roles = "Admin")
-    void crearAsignatura_Success() {
+    void createSubject_Success() {
         when(asignaturaRepository.save(any(Asignatura.class))).thenReturn(asignatura);
 
-        Asignatura result = asignaturaService.crearAsignatura(asignaturaDto);
+        Asignatura result = asignaturaService.createSubject(asignaturaDto);
 
         assertNotNull(result);
-        assertEquals(asignatura.getNombre(), result.getNombre());
-        assertEquals(asignatura.getCodigo(), result.getCodigo());
-        verify(asignaturaRepository, times(1)).save(any(Asignatura.class));
+        assertEquals(asignatura.getName(), result.getName());
+        assertEquals(asignatura.getCode(), result.getCode());
+        verify(asignaturaRepository).save(any(Asignatura.class));
     }
 
     @Test
@@ -65,7 +65,7 @@ class AsignaturaServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(asignatura.getNombre(), result.get(0).getNombre());
-        verify(asignaturaRepository, times(1)).findAll();
+        assertEquals(asignatura.getName(), result.get(0).getName());
+        verify(asignaturaRepository).findAll();
     }
 } 

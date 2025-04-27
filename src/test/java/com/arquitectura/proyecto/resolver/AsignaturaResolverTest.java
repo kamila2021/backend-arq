@@ -1,5 +1,6 @@
 package com.arquitectura.proyecto.resolver;
 
+import com.arquitectura.proyecto.dto.AsignaturaDto;
 import com.arquitectura.proyecto.model.Asignatura;
 import com.arquitectura.proyecto.service.AsignaturaService;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,20 +32,27 @@ class AsignaturaResolverTest {
     void setUp() {
         asignatura = new Asignatura();
         asignatura.setId(1L);
-        asignatura.setNombre("Asignatura 1");
-        asignatura.setCodigo("ASG001");
+        asignatura.setName("Asignatura 1");
+        asignatura.setCode("ASG001");
     }
 
     @Test
-    void crearAsignatura_Success() {
-        when(asignaturaService.crearAsignatura(any())).thenReturn(asignatura);
-
-        Asignatura result = asignaturaResolver.crearAsignatura("Asignatura 1", "ASG001");
-
+    void createSubject_ShouldReturnAsignatura() {
+        // Given
+        String nombre = "Test Subject";
+        String codigo = "TS101";
+        AsignaturaDto dto = new AsignaturaDto();
+        dto.setName(nombre);
+        dto.setCode(codigo);
+        
+        when(asignaturaService.createSubject(any(AsignaturaDto.class))).thenReturn(new Asignatura());
+        
+        // When
+        Asignatura result = asignaturaResolver.createSubject(nombre, codigo);
+        
+        // Then
         assertNotNull(result);
-        assertEquals(asignatura.getNombre(), result.getNombre());
-        assertEquals(asignatura.getCodigo(), result.getCodigo());
-        verify(asignaturaService, times(1)).crearAsignatura(any());
+        verify(asignaturaService).createSubject(any(AsignaturaDto.class));
     }
 
     @Test
@@ -56,7 +64,7 @@ class AsignaturaResolverTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(asignatura.getNombre(), result.get(0).getNombre());
+        assertEquals(asignatura.getName(), result.get(0).getName());
         verify(asignaturaService, times(1)).listarAsignaturas();
     }
 } 

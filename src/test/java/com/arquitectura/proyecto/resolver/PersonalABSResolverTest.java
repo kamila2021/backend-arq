@@ -39,16 +39,16 @@ class PersonalABSResolverTest {
         solicitud = new Solicitud();
         solicitud.setId(1L);
         solicitud.setFechaUso(LocalDate.now());
-        solicitud.setHorario(LocalTime.now());
+        solicitud.setHorario("10:00");
         solicitud.setCantGrupos(2);
-        solicitud.setEstado(false);
+        solicitud.setEstado(true);
 
         crearSolicitudInput = new CrearSolicitudInput();
         crearSolicitudInput.setIdUsuario(1L);
         crearSolicitudInput.setIdAsignatura(1L);
         crearSolicitudInput.setIdLaboratorio(1L);
         crearSolicitudInput.setFechaUso(LocalDate.now().toString());
-        crearSolicitudInput.setHorario(LocalTime.now().toString());
+        crearSolicitudInput.setHorario("10:00");
         crearSolicitudInput.setCantGrupos(2);
 
         InsumoCantidadInput insumoCantidad = new InsumoCantidadInput();
@@ -58,8 +58,8 @@ class PersonalABSResolverTest {
 
         solicitudInput = new SolicitudInput();
         solicitudInput.setFechaUso(LocalDate.now().toString());
-        solicitudInput.setHorario(LocalTime.now().toString());
-        solicitudInput.setCantGrupos(3);
+        solicitudInput.setHorario("10:00");
+        solicitudInput.setCantGrupos(2);
         solicitudInput.setEstado(true);
     }
 
@@ -73,7 +73,7 @@ class PersonalABSResolverTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(solicitud.getId(), result.get(0).getId());
-        verify(personalABSService, times(1)).listarSolicitudes();
+        verify(personalABSService).listarSolicitudes();
     }
 
     @Test
@@ -129,13 +129,17 @@ class PersonalABSResolverTest {
 
     @Test
     void modificarSolicitud_Success() {
-        when(personalABSService.modificarSolicitud(anyLong(), any())).thenReturn(solicitud);
+        when(personalABSService.modificarSolicitud(anyLong(), any(Solicitud.class))).thenReturn(solicitud);
 
         Solicitud result = personalABSResolver.modificarSolicitud(1L, solicitudInput);
 
         assertNotNull(result);
         assertEquals(solicitud.getId(), result.getId());
-        verify(personalABSService, times(1)).modificarSolicitud(anyLong(), any());
+        assertEquals(solicitud.getFechaUso(), result.getFechaUso());
+        assertEquals(solicitud.getHorario(), result.getHorario());
+        assertEquals(solicitud.getCantGrupos(), result.getCantGrupos());
+        assertEquals(solicitud.getEstado(), result.getEstado());
+        verify(personalABSService).modificarSolicitud(anyLong(), any(Solicitud.class));
     }
 
     @Test
@@ -145,7 +149,7 @@ class PersonalABSResolverTest {
         Boolean result = personalABSResolver.eliminarSolicitud(1L);
 
         assertTrue(result);
-        verify(personalABSService, times(1)).eliminarSolicitud(anyLong());
+        verify(personalABSService).eliminarSolicitud(1L);
     }
 
     @Test
@@ -169,6 +173,6 @@ class PersonalABSResolverTest {
 
         assertNotNull(result);
         assertEquals(solicitud.getId(), result.getId());
-        verify(personalABSService, times(1)).confirmarYActualizarSolicitud(anyLong());
+        verify(personalABSService).confirmarYActualizarSolicitud(1L);
     }
 } 

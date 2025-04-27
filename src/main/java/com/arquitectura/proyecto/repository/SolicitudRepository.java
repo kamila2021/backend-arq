@@ -12,10 +12,10 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Long> {
 
     List<Solicitud> findAllByOrderByFechaUsoAsc();
 
-    List<Solicitud> findAllByOrderByAsignaturaNombreAsc();
+    List<Solicitud> findAllByOrderByAsignaturaNameAsc();
 
     List<Solicitud> findByUsuarioIdOrderByFechaUsoAsc(Long idUsuario);
 
-    List<Solicitud> findByUsuarioIdOrderByAsignaturaNombreAsc(Long idUsuario);
+    List<Solicitud> findByUsuarioIdOrderByAsignaturaNameAsc(Long idUsuario);
 }
 

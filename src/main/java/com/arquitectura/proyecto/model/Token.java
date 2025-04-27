@@ -2,46 +2,76 @@ package com.arquitectura.proyecto.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-@Data
+@Entity
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Entity
-@Table(name = "tokens")
+@EntityListeners(AuditingEntityListener.class)
 public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String token;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private Usuario user;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private TokenType type;
 
-    @Column(nullable = false)
-    private Integer status = 1;
+    private int status = 1;
 
-    @Column(nullable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @LastModifiedDate
     private LocalDateTime expiresAt;
 
     public Token(String token, Usuario user, TokenType type) {
         this.token = token;
         this.user = user;
         this.type = type;
-        this.status = 1;
         this.createdAt = LocalDateTime.now();
-        this.expiresAt = LocalDateTime.now().plusMinutes(15);
+        this.expiresAt = this.createdAt.plusMinutes(15);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Token token1 = (Token) o;
+        return status == token1.status &&
+                Objects.equals(id, token1.id) &&
+                Objects.equals(token, token1.token) &&
+                type == token1.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, token, type, status);
+    }
+
+    @Override
+    public String toString() {
+        return "Token{" +
+                "id=" + id +
+                ", token='" + token + '\'' +
+                ", user=" + (user != null ? user.getId() : null) +
+                ", type=" + type +
+                ", status=" + status +
+                ", createdAt=" + createdAt +
+                ", expiresAt=" + expiresAt +
+                '}';
     }
 }

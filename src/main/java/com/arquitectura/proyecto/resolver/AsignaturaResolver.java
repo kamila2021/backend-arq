@@ -21,13 +21,12 @@ public class AsignaturaResolver {
     }
 
     @MutationMapping
-    public Asignatura crearAsignatura(@Argument String nombre, @Argument String codigo) {
-        AsignaturaDto dto = new AsignaturaDto();
-        dto.setNombre(nombre);
-        dto.setCodigo(codigo);
-        return asignaturaService.crearAsignatura(dto);
+    public Asignatura createSubject(@Argument String nombre, @Argument String codigo) {
+        AsignaturaDto asignaturaDto = new AsignaturaDto();
+        asignaturaDto.setName(nombre);
+        asignaturaDto.setCode(codigo);
+        return asignaturaService.createSubject(asignaturaDto);
     }
-
 
     @QueryMapping
     public List<Asignatura> listarAsignaturas() {

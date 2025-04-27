@@ -1,78 +1,96 @@
 package com.arquitectura.proyecto.dto;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class UsuarioDtoTest {
 
     @Test
-    void testUsuarioDto() {
-        // Crear y configurar UsuarioDto
-        UsuarioDto dto = new UsuarioDto();
-        dto.setId(1L);
-        dto.setNombre("Juan");
-        dto.setApellido("Pérez");
-        dto.setEmail("juan.perez@example.com");
-        dto.setPassword("password123");
-        dto.setAccountLocked(false);
-        dto.setEnabled(true);
+    void testUsuarioDtoSettersAndGetters() {
+        UsuarioDto usuario = new UsuarioDto();
         List<Long> roles = Arrays.asList(1L, 2L);
-        dto.setRoles(roles);
 
-        // Verificar los valores
-        assertEquals(1L, dto.getId());
-        assertEquals("Juan", dto.getNombre());
-        assertEquals("Pérez", dto.getApellido());
-        assertEquals("juan.perez@example.com", dto.getEmail());
-        assertEquals("password123", dto.getPassword());
-        assertFalse(dto.isAccountLocked());
-        assertTrue(dto.isEnabled());
-        assertEquals(roles, dto.getRoles());
+        usuario.setId(1L);
+        usuario.setNombre("María");
+        usuario.setApellido("González");
+        usuario.setEmail("maria.gonzalez@example.com");
+        usuario.setPassword("password123");
+        usuario.setEnabled(true);
+        usuario.setAccountLocked(false);
+        usuario.setRoles(roles);
 
-        // Verificar toString
-        assertNotNull(dto.toString());
+        assertEquals(1L, usuario.getId());
+        assertEquals("María", usuario.getNombre());
+        assertEquals("González", usuario.getApellido());
+        assertEquals("maria.gonzalez@example.com", usuario.getEmail());
+        assertEquals("password123", usuario.getPassword());
+        assertTrue(usuario.isEnabled());
+        assertFalse(usuario.isAccountLocked());
+        assertEquals(roles, usuario.getRoles());
+    }
 
-        // Probar otro DTO para comparación
-        UsuarioDto dto2 = new UsuarioDto();
-        dto2.setId(2L);
-        dto2.setNombre("María");
-        dto2.setApellido("García");
-        dto2.setEmail("maria.garcia@example.com");
-        dto2.setPassword("password456");
-        dto2.setAccountLocked(true);
-        dto2.setEnabled(false);
-        List<Long> roles2 = Arrays.asList(2L, 3L);
-        dto2.setRoles(roles2);
+    @Test
+    void testUsuarioDtoEqualsAndHashCode() {
+        UsuarioDto usuario1 = new UsuarioDto();
+        usuario1.setId(1L);
+        usuario1.setNombre("Juan");
+        usuario1.setApellido("Pérez");
+        usuario1.setEmail("juan.perez@example.com");
+        usuario1.setPassword("password123");
+        usuario1.setRoles(Arrays.asList(1L));
 
-        // Verificar equals y hashCode
-        assertNotEquals(dto, dto2);
-        UsuarioDto dto3 = new UsuarioDto();
-        dto3.setId(1L);
-        dto3.setNombre("Juan");
-        dto3.setApellido("Pérez");
-        dto3.setEmail("juan.perez@example.com");
-        dto3.setPassword("password123");
-        dto3.setAccountLocked(false);
-        dto3.setEnabled(true);
-        dto3.setRoles(roles);
-        assertEquals(dto, dto3);
-        assertEquals(dto.hashCode(), dto3.hashCode());
+        UsuarioDto usuario2 = new UsuarioDto();
+        usuario2.setId(1L);
+        usuario2.setNombre("Juan");
+        usuario2.setApellido("Pérez");
+        usuario2.setEmail("juan.perez@example.com");
+        usuario2.setPassword("password123");
+        usuario2.setRoles(Arrays.asList(1L));
+
+        UsuarioDto usuario3 = new UsuarioDto();
+        usuario3.setId(2L);
+        usuario3.setNombre("María");
+        usuario3.setApellido("González");
+        usuario3.setEmail("maria.gonzalez@example.com");
+        usuario3.setPassword("password456");
+        usuario3.setRoles(Arrays.asList(2L));
+
+        assertEquals(usuario1, usuario2);
+        assertEquals(usuario1.hashCode(), usuario2.hashCode());
+        assertNotEquals(usuario1, usuario3);
+        assertNotEquals(usuario1.hashCode(), usuario3.hashCode());
+    }
+
+    @Test
+    void testUsuarioDtoToString() {
+        UsuarioDto usuario = new UsuarioDto();
+        usuario.setId(1L);
+        usuario.setNombre("Juan");
+        usuario.setApellido("Pérez");
+        usuario.setEmail("juan.perez@example.com");
+
+        String toString = usuario.toString();
+        
+        assertTrue(toString.contains("id=1"));
+        assertTrue(toString.contains("nombre=Juan"));
+        assertTrue(toString.contains("apellido=Pérez"));
+        assertTrue(toString.contains("email=juan.perez@example.com"));
     }
 
     @Test
     void testUsuarioDtoWithNullValues() {
-        UsuarioDto dto = new UsuarioDto();
+        UsuarioDto usuario = new UsuarioDto();
         
-        assertNull(dto.getId());
-        assertNull(dto.getNombre());
-        assertNull(dto.getApellido());
-        assertNull(dto.getEmail());
-        assertNull(dto.getPassword());
-        assertFalse(dto.isAccountLocked());
-        assertFalse(dto.isEnabled());
-        assertNull(dto.getRoles());
+        assertNull(usuario.getId());
+        assertNull(usuario.getNombre());
+        assertNull(usuario.getApellido());
+        assertNull(usuario.getEmail());
+        assertNull(usuario.getPassword());
+        assertFalse(usuario.isAccountLocked());
+        assertFalse(usuario.isEnabled());
+        assertNull(usuario.getRoles());
     }
 } 

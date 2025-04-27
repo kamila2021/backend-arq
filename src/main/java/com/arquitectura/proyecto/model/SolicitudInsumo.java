@@ -1,28 +1,39 @@
 package com.arquitectura.proyecto.model;
 
-
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 // Solicitud.java
 @Entity
-@Data
-
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class SolicitudInsumo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_solicitud")
+    @JoinColumn(name = "solicitud_id")
     private Solicitud solicitud;
 
     @ManyToOne
-    @JoinColumn(name = "id_insumo")
+    @JoinColumn(name = "insumo_id")
     private Insumo insumo;
 
-    private Double cantidad;
+    private Float cantidad;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime lastModifiedDate;
 }
