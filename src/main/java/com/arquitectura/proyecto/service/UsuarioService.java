@@ -52,55 +52,41 @@ public class UsuarioService {
     @PreAuthorize("hasRole('ROLE_Admin')")
     public UsuarioDto actualizarUsuario(UsuarioDto usuarioDTO) {
         try {
-            System.out.println("1 Buscando usuario por ID: " + usuarioDTO.getId());
-            Optional<Usuario> optionalUsuario = this.usuarioRepository.findById(usuarioDTO.getId());
-            if (optionalUsuario.isPresent()) {
-                System.out.println("2 Usuario encontrado");
-                Usuario usuario = optionalUsuario.get();
-                usuario.setNombre(usuarioDTO.getNombre());
-                usuario.setApellido(usuarioDTO.getApellido());
-                usuario.setEmail(usuarioDTO.getEmail());
-                usuario.setPassword(usuarioDTO.getPassword());
-                // Crear un conjunto para almacenar los roles actualizados del usuario
-                Set<Rol> rolesActualizados = new HashSet<>();
-
-                // Iterar sobre los IDs de roles del DTO
-                for (Long roleId : usuarioDTO.getRoles()) {
-                    // Buscar el rol correspondiente en la base de datos
-                    Optional<Rol> optionalRol = roleRepository.findById(roleId);
-                    if (optionalRol.isPresent()) {
-                        // Si se encuentra el rol, agregarlo al conjunto de roles actualizados del usuario
-                        rolesActualizados.add(optionalRol.get());
-                    } else {
-                        // Manejar el caso en el que no se encuentre el rol
-                        // Por ejemplo, lanzar una excepción o registrar un mensaje de error
-                    }
-                }
-
-                // Actualizar los roles del usuario con el conjunto de roles actualizados
-                usuario.setRoles(rolesActualizados);
-
-                usuario.setLastModifiedDate(LocalDateTime.now()); // Opcional: Actualizar la fecha de modificación aquí
-                Usuario savedUsuario = this.usuarioRepository.save(usuario);
-                return usuarioDTO;
-            } else {
-                System.out.println("Usuario no encontrado");
-                return null;
+            Usuario usuario = usuarioRepository.findById(usuarioDTO.getId())
+                    .orElseThrow(() -> new RuntimeException(String.format("Usuario con id %s no encontrado", usuarioDTO.getId())));
+            
+            usuario.setNombre(usuarioDTO.getNombre());
+            usuario.setApellido(usuarioDTO.getApellido());
+            usuario.setEmail(usuarioDTO.getEmail());
+            usuario.setPassword(usuarioDTO.getPassword());
+            
+            Set<Rol> rolesActualizados = new HashSet<>();
+            for (Long roleId : usuarioDTO.getRoles()) {
+                Rol role = roleRepository.findById(roleId)
+                        .orElseThrow(() -> new RuntimeException(String.format("Rol con id %s no encontrado", roleId)));
+                rolesActualizados.add(role);
             }
+            
+            usuario.setRoles(rolesActualizados);
+            usuario.setLastModifiedDate(LocalDateTime.now());
+            
+            usuarioRepository.save(usuario);
+            return usuarioDTO;
         } catch (Exception e) {
-            System.out.println("Error al actualizar usuario: " + e.getMessage());
-            // Manejar la excepción de manera más específica
-            return null;
+            throw new RuntimeException("Error al actualizar usuario: " + e.getMessage());
         }
     }
 
     @PreAuthorize("hasRole('ROLE_Admin')")
     public ResponseEntity eliminarUsuario(Long usuarioId) {
         try {
-            this.usuarioRepository.deleteById(usuarioId);
-            return ResponseEntity.ok(true); // Retorna true si se elimina el usuario
+            if (!usuarioRepository.existsById(usuarioId)) {
+                throw new RuntimeException(String.format("Usuario con id %s no encontrado", usuarioId));
+            }
+            usuarioRepository.deleteById(usuarioId);
+            return ResponseEntity.ok(true);
         } catch (Exception e) {
-            return ResponseEntity.ok(false); // Retorna false si ocurre un error
+            return ResponseEntity.badRequest().body(false);
         }
     }
 
@@ -131,9 +117,15 @@ public class UsuarioService {
             System.out.println("CreatedAt: " + LocalDateTime.now());
             newUsuario.setCreatedAt(LocalDateTime.now());
 
-            // Este lo puedes dejar así de momento si lo seteás manualmente
             System.out.println("LastModifiedDate: " + LocalDateTime.now());
             newUsuario.setLastModifiedDate(LocalDateTime.now());
+
+            // Verificar que todos los roles existan antes de guardar el usuario
+            for (Long roleId : usuarioDto.getRoles()) {
+                if (!roleRepository.existsById(roleId)) {
+                    throw new RuntimeException(String.format("Rol con id %s no encontrado", roleId));
+                }
+            }
 
             // Guardar el nuevo usuario en la base de datos
             Usuario usuarioGuardado = usuarioRepository.save(newUsuario);
@@ -148,8 +140,7 @@ public class UsuarioService {
 
         } catch (Exception e) {
             System.err.println("Error al crear usuario: " + e.getMessage());
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("Error al crear usuario: " + e.getMessage());
         }
     }
 
@@ -157,8 +148,15 @@ public class UsuarioService {
     public void asignarRolesAUsuario(Long usuarioId, List<Long> rolesIds) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        List<Rol> roles = roleRepository.findAllById(rolesIds);
-        usuario.setRoles(new HashSet<>(roles));
+        
+        Set<Rol> roles = new HashSet<>();
+        for (Long roleId : rolesIds) {
+            Rol role = roleRepository.findById(roleId)
+                    .orElseThrow(() -> new RuntimeException(String.format("Rol con id %s no encontrado", roleId)));
+            roles.add(role);
+        }
+        
+        usuario.setRoles(roles);
         usuarioRepository.save(usuario);
     }
 

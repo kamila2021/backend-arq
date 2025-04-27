@@ -9,6 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -50,8 +51,31 @@ public class Usuario {
     @Column(nullable = false)
     private LocalDateTime lastModifiedDate;
 
-    public String fullname(){
-        return nombre + " " + apellido;
+    public String fullname() {
+        return nombre + " " + (apellido != null ? apellido : "");
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Usuario usuario = (Usuario) o;
+        return accountLocked == usuario.accountLocked &&
+               enabled == usuario.enabled &&
+               Objects.equals(id, usuario.id) &&
+               Objects.equals(nombre, usuario.nombre) &&
+               Objects.equals(apellido, usuario.apellido) &&
+               Objects.equals(email, usuario.email) &&
+               Objects.equals(password, usuario.password) &&
+               Objects.equals(resetPasswordToken, usuario.resetPasswordToken) &&
+               Objects.equals(roles, usuario.roles) &&
+               Objects.equals(createdAt, usuario.createdAt) &&
+               Objects.equals(lastModifiedDate, usuario.lastModifiedDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, nombre, apellido, email, password, accountLocked, enabled,
+                          resetPasswordToken, roles, createdAt, lastModifiedDate);
+    }
 }

@@ -6,28 +6,42 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
-@Table(name = "TOKEN")
+@Table(name = "tokens")
 public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String token;
 
-    private LocalDateTime createdAt;
-
-    private LocalDateTime expiresAt;
-
-    private LocalDateTime validatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private Usuario user;
 
-    @Column(name = "status", columnDefinition = "integer default 1", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TokenType type;
+
+    @Column(nullable = false)
     private Integer status = 1;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime expiresAt;
+
+    public Token(String token, Usuario user, TokenType type) {
+        this.token = token;
+        this.user = user;
+        this.type = type;
+        this.status = 1;
+        this.createdAt = LocalDateTime.now();
+        this.expiresAt = LocalDateTime.now().plusMinutes(15);
+    }
 }

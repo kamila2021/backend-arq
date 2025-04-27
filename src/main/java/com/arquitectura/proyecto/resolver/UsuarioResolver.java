@@ -44,8 +44,10 @@ public class UsuarioResolver {
     public Boolean eliminarUsuario(@Argument Long usuarioId) {
         try {
             return this.usuarioService.eliminarUsuario(usuarioId).getStatusCode().is2xxSuccessful();
+        } catch (IllegalArgumentException e) {
+            throw e; // Propagar IllegalArgumentException
         } catch (Exception e) {
-            return false; // Retorna false si hay algún error
+            return false; // Retorna false para otros tipos de error
         }
     }
 

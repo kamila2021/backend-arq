@@ -1,6 +1,6 @@
 package com.arquitectura.proyecto.config.filters;
 
-import com.arquitectura.proyecto.config.provider.JwtTokenProvider;
+import com.arquitectura.proyecto.security.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

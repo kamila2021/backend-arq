@@ -30,6 +30,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String rawPassword = credentials.toString();
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        
+        if (userDetails == null) {
+            throw new BadCredentialsException("Usuario no encontrado");
+        }
 
         if (!passwordEncoder.matches(rawPassword, userDetails.getPassword())) {
             throw new BadCredentialsException("Credenciales inválidas");

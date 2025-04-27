@@ -24,20 +24,20 @@ import java.util.List;
 @Log4j2
 public class AuthenticationService {
 
-
-
     private final RoleRepository roleRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioRepository userRepository;
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
-    private final UsuarioRepository userRepository;
 
     @Value("${application.mailing.frontend.activation-url}")
     private String activationUrl;
 
-
     public void sendValidationEmail(Usuario user) throws MessagingException {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        
         try {
             var newToken = generateAndSaveToken(user);
             emailService.sendEmail(
@@ -49,18 +49,17 @@ public class AuthenticationService {
         } catch(Exception e) {
             throw new IllegalArgumentException("Error: " + e.getMessage());
         }
-
     }
-    private String generateAndSaveToken(Usuario user) {
 
-        String generatedToken= generateActivationCode(6);
+    private String generateAndSaveToken(Usuario user) {
+        String generatedToken = generateActivationCode(6);
 
         var token = Token.builder()
                 .token(generatedToken)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
                 .user(user)
-                .status(1) // 👈 aquí asignas un valor no nulo
+                .status(1)
                 .build();
         user.setResetPasswordToken(generatedToken);
         userRepository.save(user);
@@ -69,10 +68,10 @@ public class AuthenticationService {
     }
 
     private String generateActivationCode(int length) {
-        String characters="0123456789";
+        String characters = "0123456789";
         StringBuilder codeBuilder = new StringBuilder();
         SecureRandom random = new SecureRandom();
-        for (int i = 0; i < length; i++ ){
+        for (int i = 0; i < length; i++) {
             int randomIndex = random.nextInt(characters.length());
             codeBuilder.append(characters.charAt(randomIndex));
         }
