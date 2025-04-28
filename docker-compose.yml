@@ -9,7 +9,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sistemaBdd
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: kamila
+      SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
       - db
 
@@ -20,7 +20,7 @@ services:
     environment:
       POSTGRES_DB: sistemaBdd
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: kamila
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
