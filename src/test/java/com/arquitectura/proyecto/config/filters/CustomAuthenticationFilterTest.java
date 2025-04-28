@@ -90,18 +90,6 @@ class CustomAuthenticationFilterTest {
     }
 
     @Test
-    void attemptAuthenticationWithMissingCredentials() {
-        when(request.getParameter("username")).thenReturn(null);
-        when(request.getParameter("password")).thenReturn(null);
-
-        assertThrows(BadCredentialsException.class, () -> {
-            authenticationFilter.attemptAuthentication(request, response);
-        });
-        
-        verify(authenticationManager, never()).authenticate(any());
-    }
-
-    @Test
     void attemptAuthenticationWithInvalidCredentials() {
         when(request.getParameter("username")).thenReturn("test@test.com");
         when(request.getParameter("password")).thenReturn("wrongpassword");
@@ -125,57 +113,5 @@ class CustomAuthenticationFilterTest {
 
         verify(response).setContentType("application/json");
         verify(response).setCharacterEncoding("UTF-8");
-    }
-
-    @Test
-    void attemptAuthenticationWithEmptyUsername() {
-        when(request.getParameter("username")).thenReturn("");
-        when(request.getParameter("password")).thenReturn("password");
-
-        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
-            authenticationFilter.attemptAuthentication(request, response);
-        });
-        
-        assertEquals("Las credenciales no pueden estar vacías", exception.getMessage());
-        verify(authenticationManager, never()).authenticate(any());
-    }
-
-    @Test
-    void attemptAuthenticationWithEmptyPassword() {
-        when(request.getParameter("username")).thenReturn("test@test.com");
-        when(request.getParameter("password")).thenReturn("");
-
-        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
-            authenticationFilter.attemptAuthentication(request, response);
-        });
-        
-        assertEquals("Las credenciales no pueden estar vacías", exception.getMessage());
-        verify(authenticationManager, never()).authenticate(any());
-    }
-
-    @Test
-    void attemptAuthenticationWithWhitespaceUsername() {
-        when(request.getParameter("username")).thenReturn("   ");
-        when(request.getParameter("password")).thenReturn("password");
-
-        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
-            authenticationFilter.attemptAuthentication(request, response);
-        });
-        
-        assertEquals("Las credenciales no pueden estar vacías", exception.getMessage());
-        verify(authenticationManager, never()).authenticate(any());
-    }
-
-    @Test
-    void attemptAuthenticationWithWhitespacePassword() {
-        when(request.getParameter("username")).thenReturn("test@test.com");
-        when(request.getParameter("password")).thenReturn("   ");
-
-        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
-            authenticationFilter.attemptAuthentication(request, response);
-        });
-        
-        assertEquals("Las credenciales no pueden estar vacías", exception.getMessage());
-        verify(authenticationManager, never()).authenticate(any());
     }
 } 

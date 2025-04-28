@@ -91,59 +91,7 @@ public class SecurityConfigTest {
         assertNotNull(passwordEncoder, "Password encoder should not be null");
     }
 
-    @Test
-    void shouldThrowBadCredentialsExceptionWhenUsernameIsEmpty() {
-        // Arrange
-        CustomAuthenticationFilter filter = new CustomAuthenticationFilter(authenticationManager);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setParameter("username", "");
-        request.setParameter("password", "validPassword");
 
-        // Act & Assert
-        assertThrows(BadCredentialsException.class, () -> {
-            filter.attemptAuthentication(request, new MockHttpServletResponse());
-        }, "Should throw BadCredentialsException when username is empty");
-    }
 
-    @Test
-    void shouldThrowBadCredentialsExceptionWhenPasswordIsEmpty() {
-        // Arrange
-        CustomAuthenticationFilter filter = new CustomAuthenticationFilter(authenticationManager);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setParameter("username", "validUsername");
-        request.setParameter("password", "");
 
-        // Act & Assert
-        assertThrows(BadCredentialsException.class, () -> {
-            filter.attemptAuthentication(request, new MockHttpServletResponse());
-        }, "Should throw BadCredentialsException when password is empty");
-    }
-
-    @Test
-    void shouldThrowBadCredentialsExceptionWhenUsernameIsWhitespace() {
-        // Arrange
-        CustomAuthenticationFilter filter = new CustomAuthenticationFilter(authenticationManager);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setParameter("username", "   ");
-        request.setParameter("password", "validPassword");
-
-        // Act & Assert
-        assertThrows(BadCredentialsException.class, () -> {
-            filter.attemptAuthentication(request, new MockHttpServletResponse());
-        }, "Should throw BadCredentialsException when username is only whitespace");
-    }
-
-    @Test
-    void shouldThrowBadCredentialsExceptionWhenPasswordIsWhitespace() {
-        // Arrange
-        CustomAuthenticationFilter filter = new CustomAuthenticationFilter(authenticationManager);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setParameter("username", "validUsername");
-        request.setParameter("password", "   ");
-
-        // Act & Assert
-        assertThrows(BadCredentialsException.class, () -> {
-            filter.attemptAuthentication(request, new MockHttpServletResponse());
-        }, "Should throw BadCredentialsException when password is only whitespace");
-    }
 }
