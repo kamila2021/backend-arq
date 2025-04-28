@@ -104,7 +104,7 @@ public class PersonalABSService {
         return solicitudRepository.save(solicitud); // 👈 este objeto ya tiene un ID
     }
 
-
+    @Transactional
     @PreAuthorize("isAuthenticated()")
     public void eliminarSolicitud(Long idSolicitud) {
         Solicitud solicitud = solicitudRepository.findById(idSolicitud)
@@ -112,7 +112,6 @@ public class PersonalABSService {
 
         List<SolicitudInsumo> insumos = solicitudInsumoRepository.findBySolicitudId(idSolicitud);
         solicitudInsumoRepository.deleteAll(insumos);
-
         solicitudRepository.delete(solicitud);
     }
 
